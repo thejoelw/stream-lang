@@ -1,0 +1,310 @@
+// NOTICE: this file is just some random notes and snippets of stream code that I've created over a few months.
+// A lot of the spec has changed since a lot of this code was written, so much of it is out of date and actually invalid syntax.
+// There's some good stuff in here, but a lot of it is old.
+
+function_call = {
+	= +config = Fs.read[:'config.txt'] =>{} Json.decode{.opt: 123}
+	<= +config <= Fs 'read' {:'config.txt'} =>{} Json 'decode' {.opt: 123}
+	<= +config <= (((Fs 'read') {:'config.txt'}) =>{} ((Json 'decode') {.opt: 123}))
+	<= +config <= (((Fs 'read') {:'config.txt'}) =>{} ((Json 'decode') {.opt: 123}))
+
+	<= Fs.write <- {:'config.txt'} <= .data: Json.encode{.opt : 123} <- config
+
+	+a = (1)
+	+b = (2)
+	a <= b
+}
+
+
+// How do actor input and outputs work?
+// Variables this, in, and out are provided
+// Piping or reading from nothing aliases in
+// Piping or reading to nothing aliases out
+
+
+// Value comparison
+<~ !>
+>~ !<
+<> !~
+~
+
+// Object comparison
+==
+!=
+
+
+A -> B
+C => D
+// If A updates, run all B with in=A
+// If B updates, run new B foreach A with in=A
+// If C updates, add new C to D
+// If D updates, do nothing
+
+
+.abc == .abc // False
+.abc ~ .abc // True
+
+
+// Throw
+stream -> !is_int -> Error(Error.high, 'Argument must be an integer')
+
+
+// Default arguments
++args = {=> +target
+	<= { => +source
+		source.keys -> {
+			source in => target in
+		}
+	}
+}
+
++func = {-> args{.argA: +a, .argB: +b}
+}
+
+
+// Splitting a stream
++my_stream
++a, +b
++split = {=> +obj => (if(obj.num >= 0) {a} else {b})}
+split <- my_stream
+// Whenever a new value is sent into my_stream, send it to split.
+// Split creates a new stream (+obj)
+// Split evaluates the parenthesis
+// obj is currently an empty set. 
+
++if
++elif
++else
+
+{
+	if = {=> cond
+		cond #
+	}
+}
+
+// Comparison operators return first argument if true, or empty set if false
+
+// Cloning a stream
+my_stream => +my_stream
+
+// Joining a stream on the i key
+
+// Sorting a stream
++my_stream = (6,3,4,2,1)
+my_stream -> {
+	+max
+	+i = 0
+	my_stream -> {=> +cur
+		cur !> max[-1].el # ~ 0 -> {
+			max <= {.i: i, .el: cur}
+		}
+		i <= i + 1
+	}
+} -> +sorted_stream
+
+
++range = {-> args[.start: +list, .end: +end, .step: +step]
+	step #=0 -> {step = 1}
+	<= list < end -> {in + step => list, =>}
+}
+
++repeat = {=> +num
+	= {=> +func
+		<= range{start: 0, end: num} -> func
+	}
+}
+
++while = {=> +cond
+	= {=> +body
+		+list = 0
+		<= cond list #>0 -> {in -> list, body in =>}
+	}
+}
+
+
+// Python list comprehension:
+// S = [2*x for x in range(100) if x**2 > 3]
+
++S = range(0, 100) -> {in * in > 3 =>} -> 2*
+
+
+// Native operators:
+= <= =>
+<- ->
+{} [] ()
+,
+'' ""
++
+#
+
+
+// Lazy
++ints = (0, -1, 1)
+ints > 0 -> {ints <= (-in - 1, in + 1)}]
+
++is_prime = {
+	<= in % range(2, sqrt(in)) ~ 0 #~0 -> [in =>]
+}
+
++primes = ints > 2 < 1000 -> is_prime
+
+
+// Classes
+
++Class = {
+	.get_a : {'a' =>}
+	.get_b : {'b' =>}
+}
+
+
+// Read from a file, parse as csv, sort by the second column, and write back to the file.
+(<= FS.read[:'test.txt']).lines.split[:',']
+
++out_stream = out
+(out_stream <= Fs.read <- ['test.txt']).lines -> {=> +line
+    out_stream <= Console.write <- line.upperCase()
+}
+
+
+/*
+todo
+
+control structures
+continuous assertions
+assertions / errors / exceptions
+
+It would be really nice if streams were un-ordered. Then, programmers wouldn't be tempted to write functions to access a stream item at an index.
+We don't want this because it should be easy for a programmer to change from access by i to access by name or another property.
+*/
+
+
+// Creating a setter
+// A => B
+// A -> |B|
++prop
+|prop| = {-> 0.is_super =>}
+|prop| = 0.is_super
+2 => prop
++num <= prop
+
+// |stream| returns a stream that contains one function, when piped to, appends to the original stream.
+
+// ->[] pipes to the next [], and likewise with {} and (), and with =>
+// A: B is a native language construct for 2 reasons:
+	// So it can be used in a function, and the internal "in" variable accesses the containing function's "in".
+	// So it's precedence can be lowered so that "A: B C" evaluates to "A: (B C)" instead of "(A: B) C"
+// "A: B" converts to "-> {in ~ A} -> {B =>} =>, -> {in == keys} -> {A =>} =>"
+// [...] and {...} both enclose functions, but only {...} creates a new scope. In addition, inside of [...], only the empty values, not in or out, are set.
+// Standard convention should be to use [...] for function arguments
+
+
+// File reading / writing
+(<= FS.read[:'test.txt']).data -> ...
+(<= FS.write[:'test.txt']).data <- ...
+
+
+// Type extension
++make_type = {{
+	+extensions
+
+	.extend: {
+		out = make_type[]
+		out.extend (in, extensions)
+	}
+
+	.new: {
+		{
+			-> extensions =>
+		}
+	}
+}}
++Type = make_type[]
+
++Child = Type.extend {
+	.get_abc: {'abc' =>}
+}
++inst = Child.new
+
+
+// How do you sort a stream for piping?
+// Needs to be able to sort both the input and function streams.
+// A stream becomes unordered when it is written to, or joined with another stream.
+// To sort a stream:
+my_stream
+
+
+// Can only write to in-scope streams.
+// No, can write anywhere.
++get_c = {
+	<= +c
+}
++a
+{
+	+b
+	a <= 1 // Fine
+	b <= 2 // Fine
+	get_c[] <= 3 // Error
+}
+
+
+func[...] - Binds arguments and returns known values but will not cause side-effects or mutate any objects. Can call external objects but cannot cause side-effects.
+func(...) - Same as above but can cause side-effects or mutate objects.
+
+Function calls must be accomplished with a single message. Otherwise, multiple actors calling the same function will conflict.
+
+Chaining operations?
+
+Returns a promise that will resolve to the file contents
+
+Pass implicit sets by reference???
+
+
+Precedence:
+1. Parenthesis
+2. Implicit left to right
+3. Explicit single left arrows right to left, and explicit single right arrows left to right
+4. Explicit double left arrows right to left, and explicit double right arrows left to right
+
+<= {
+	function_call <- (...) <- {. == this} <- {
+
+	}
+}
+
+A B
+Foreach element a in A:
+	a <- B
+
+When an actor replies with an object, it can be consumed by its caller. If it not consumed, it automatically replies and propogates up the call chain.
+
+
+A list does not create its own scope. Variables declared inside of it enter the parent scope.
+Once a variable is declared, it must be assigned an object immediately.
+That object cannot be changed unless the variable is re-declared - Need a mutable keyword to do this
+There exists a Box type that wraps another type, like a pointer
++obj = 123
+obj = 456 // not an error
+obj.inc()
+
+(1, 2, a=3)
+([key = '', val = 1], [key = '', val = 2], [key = 'a', val = 3])
+
+{-> (+a, +b, a=+c)}
+{-> ([key = '', val = +a], [key = '', val = +b], [key = 'a', val = +c])}
+
+
+fib = {
+	==1 1
+	1 fib
+}
+
+(+var)
+{==''}
+
+set is everything
+(a, :b 2)
+
++Object = {(+in1, :a +in2) -> obj1 -> obj2 -> (+out1, +out2)
+
+	=='=' { => (, +source); }
+}
