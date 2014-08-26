@@ -5,8 +5,8 @@
  * To generate the lexical analyzer run: "flex Lexer.l"
  */
 
-#include "Expression.h"
 #include "Parser.h"
+#include "astnode.h"
 
 #include <stdio.h>
 #include <iostream>

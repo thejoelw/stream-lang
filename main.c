@@ -6,14 +6,15 @@
 
 #include "Parser.h"
 #include "Lexer.h"
+#include "astnode.h"
 
 #include <stdio.h>
 
-int yyparse(SExpression **expression, yyscan_t scanner);
+int yyparse(AstNode **expression, yyscan_t scanner);
 
-SExpression *getAST(const char *expr)
+AstNode *getAST(const char *expr)
 {
-    SExpression *expression;
+    AstNode *expression;
     yyscan_t scanner;
     YY_BUFFER_STATE state;
 
@@ -36,7 +37,7 @@ SExpression *getAST(const char *expr)
     return expression;
 }
 
-int evaluate(SExpression *e)
+int evaluate(AstNode *e)
 {
     /*
     switch (e->type) {
@@ -57,7 +58,7 @@ int main(void)
 {
     char test[] = "+my_stream = (1, 2), my_stream <= 3, my_stream -> {in + 1}";
 
-    SExpression *e = NULL;
+    AstNode *e = NULL;
     int result = 0;
 
     e = getAST(test);
@@ -65,8 +66,6 @@ int main(void)
     result = evaluate(e);
 
     printf("Result of '%s' is %d\n", test, result);
-
-    deleteExpression(e);
 
     return 0;
 }
