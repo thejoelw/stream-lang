@@ -1,6 +1,6 @@
 # Makefile
 
-FILES	= Lexer.c Parser.c main.c
+FILES	= Lexer.c Parser.c main.c astexpr.cpp astapply.cpp astflow.cpp astfunction.cpp astident.cpp astnumber.cpp bignum.cpp
 CC	= clang++
 
 CFLAGS	= -g -std=c++11 -lgmp `llvm-config --cppflags --ldflags --libs core`

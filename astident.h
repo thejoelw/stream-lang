@@ -10,6 +10,15 @@ public:
         : symbol(symbol)
     {}
 
+    std::string to_string(unsigned int indent = 0)
+    {
+        if (declare) {return "+" + symbol;}
+        else {return symbol;}
+    }
+
+    static AstIdent * const ImplicitIn;
+    static AstIdent * const ImplicitOut;
+
 protected:
     std::string symbol;
     bool declare;

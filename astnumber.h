@@ -10,6 +10,11 @@ public:
         : number(number)
     {}
 
+    std::string to_string(unsigned int indent = 0)
+    {
+        return number;
+    }
+
 protected:
     std::string number;
 };

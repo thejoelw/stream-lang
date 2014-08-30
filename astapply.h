@@ -11,6 +11,11 @@ public:
         , input(input)
     {}
 
+    std::string to_string(unsigned int indent = 0)
+    {
+        return "(" + func->to_string(indent) + " <- " + input->to_string(indent) + ")";
+    }
+
 protected:
     AstExpr *func;
     AstExpr *input;

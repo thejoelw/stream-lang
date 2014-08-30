@@ -39,24 +39,12 @@ AstExpr *getAST(const char *expr)
 
 int evaluate(AstExpr *e)
 {
-    /*
-    switch (e->type) {
-        case eVALUE:
-            return e->value;
-        case eMULTIPLY:
-            return evaluate(e->left) * evaluate(e->right);
-        case ePLUS:
-            return evaluate(e->left) + evaluate(e->right);
-        default:
-            // shouldn't be here
-            return 0;
-    }
-    */
+    return 0;
 }
 
 int main(void)
 {
-    char test[] = "+my_stream = (1, 2), my_stream <= 3, my_stream -> {in + 1}";
+    char test[] = "+my_stream = (1, 2), my_stream <= 3, my_stream -> {in + 1} =>";
 
     AstExpr *e = NULL;
     int result = 0;
@@ -66,6 +54,8 @@ int main(void)
     result = evaluate(e);
 
     printf("Result of '%s' is %d\n", test, result);
+
+    std::cout << e->to_string() << std::endl;
 
     return 0;
 }

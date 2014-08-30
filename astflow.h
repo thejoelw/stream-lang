@@ -11,6 +11,11 @@ public:
         , source(source)
     {}
 
+    std::string to_string(unsigned int indent = 0)
+    {
+        return "(" + target->to_string(indent) + " <= " + source->to_string(indent) + ")";
+    }
+
 protected:
     AstExpr *target;
     AstExpr *source;

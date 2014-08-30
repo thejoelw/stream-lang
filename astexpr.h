@@ -18,7 +18,7 @@ public:
     virtual ~AstExpr()
     {}
 
-    //virtual std::string to_string() = 0;
+    virtual std::string to_string(unsigned int indent = 0) = 0;
     //virtual llvm::Value *to_code() = 0;
 };
 

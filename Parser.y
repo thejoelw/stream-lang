@@ -40,7 +40,7 @@ typedef void* yyscan_t;
     #include "astexpr.h"
     #include "astident.h"
     #include "astnumber.h"
-    #include "astblock.h"
+    #include "astfunction.h"
     #include "astapply.h"
     #include "astflow.h"
 }
@@ -48,8 +48,7 @@ typedef void* yyscan_t;
 %union
 {
     std::string *string;
-    AstBlock *body;
-    AstBlock *block;
+    AstFunction *function;
     AstExpr *expr;
 }
 
@@ -79,30 +78,31 @@ typedef void* yyscan_t;
 %token <string> DECL_IDENT
 %token <string> IDENTIFIER
 
-%type <body> body
-%type <block> block
+%type <function> body
+%type <expr> block
 %type <expr> expr
 
 %%
 
 body
-    : %empty { $$ = new AstBlock(); }
-    | expr { $$ = new AstBlock(); $$->add_expr($1); }
-    | body BREAK expr { $$ = $1; $$->add_expr($3); }
+    : %empty { *expression = $$ = new AstFunction(); }
+    | expr { *expression = $$ = new AstFunction(); $$->add_expr($1); }
+    | body BREAK expr { *expression = $$ = $1; $$->add_expr($3); }
     ;
 
 block
-    : LBRACE body RBRACE { $$ = $2; $2->set_type(AstBlock::TYPE_MAJOR); }
-    | LBRACKET body RBRACKET { $$ = $2; $2->set_type(AstBlock::TYPE_MINOR); }
-    | LPAREN body RPAREN { $$ = $2 /* (...) :=: -> [...] => */; $2->set_type(AstBlock::TYPE_MINOR); }
+    : LBRACE body RBRACE { $$ = $2; $2->bind(AstFunction::BindInOut | AstFunction::BindImplicitRel | AstFunction::BindIdentDecl); }
+    | LBRACKET body RBRACKET { $$ = $2; $2->bind(AstFunction::BindImplicitRel | AstFunction::BindAutoOut); }
+    | LPAREN body RPAREN { $$ = new AstApply($2, AstIdent::ImplicitIn); $2->bind(AstFunction::BindAutoOut); }
     ;
 
 expr
     : DECL_IDENT { $$ = new AstIdent($1->substr(1), true); }
-    | IDENTIFIER { $$ = new AstIdent(*$1, false); }
+    | IDENTIFIER { $$ = new AstIdent(*$1); }
     | NUMBER { $$ = new AstNumber(*$1); }
     | block { $$ = $1; }
     | expr expr { $$ = new AstApply($1, $2); }
+
     | expr LAPPLY expr { $$ = new AstApply($1, $3); }
     | expr RAPPLY expr { $$ = new AstApply($3, $1); }
     | expr FLOW expr { $$ = new AstFlow($1, $3); }
@@ -114,6 +114,36 @@ expr
     | expr STREAM_LEN { /* $$ = new AstLength($1); */ }
     | expr STREAM_FIRST { /* $$ = new AstFirst($1); */ }
     | expr STREAM_LAST { /* $$ = new AstLast($1); */ }
+
+    | LAPPLY expr { $$ = new AstApply(AstIdent::ImplicitOut, $2); }
+    | RAPPLY expr { $$ = new AstApply($2, AstIdent::ImplicitIn); }
+    | FLOW expr { $$ = new AstFlow(AstIdent::ImplicitOut, $2); }
+    | LFLOW expr { $$ = new AstFlow(AstIdent::ImplicitOut, $2); }
+    | RFLOW expr { $$ = new AstFlow($2, AstIdent::ImplicitIn); }
+    | PIPE expr { /* $$ = new AstPipe($2, AstIdent::ImplicitIn); */ }
+    | LPIPE expr { /* $$ = new AstPipe(AstIdent::ImplicitOut, $2); */ }
+    | RPIPE expr { /* $$ = new AstPipe($2, AstIdent::ImplicitIn); */ }
+    | STREAM_LEN { /* $$ = new AstLength(AstIdent::ImplicitIn); */ }
+    | STREAM_FIRST { /* $$ = new AstFirst(AstIdent::ImplicitIn); */ }
+    | STREAM_LAST { /* $$ = new AstLast(AstIdent::ImplicitIn); */ }
+
+    | expr LAPPLY { $$ = new AstApply($1, AstIdent::ImplicitIn); }
+    | expr RAPPLY { $$ = new AstApply(AstIdent::ImplicitOut, $1); }
+    | expr FLOW { $$ = new AstFlow($1, AstIdent::ImplicitIn); }
+    | expr LFLOW { $$ = new AstFlow($1, AstIdent::ImplicitIn); }
+    | expr RFLOW { $$ = new AstFlow(AstIdent::ImplicitOut, $1); }
+    | expr PIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, $1); */ }
+    | expr LPIPE { /* $$ = new AstPipe($1, AstIdent::ImplicitIn); */ }
+    | expr RPIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, $1); */ }
+
+    | LAPPLY { $$ = new AstApply(AstIdent::ImplicitOut, AstIdent::ImplicitIn); }
+    | RAPPLY { $$ = new AstApply(AstIdent::ImplicitOut, AstIdent::ImplicitOut); }
+    | FLOW { $$ = new AstFlow(AstIdent::ImplicitOut, AstIdent::ImplicitIn); }
+    | LFLOW { $$ = new AstFlow(AstIdent::ImplicitOut, AstIdent::ImplicitIn); }
+    | RFLOW { $$ = new AstFlow(AstIdent::ImplicitOut, AstIdent::ImplicitOut); }
+    | PIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, AstIdent::ImplicitOut); */ }
+    | LPIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, AstIdent::ImplicitIn); */ }
+    | RPIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, AstIdent::ImplicitOut); */ }
     ;
 
 %%
