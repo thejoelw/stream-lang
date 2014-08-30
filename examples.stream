@@ -225,13 +225,20 @@ We don't want this because it should be easy for a programmer to change from acc
 }
 +inst = Child.new
 
+// Super-last?
++stream
+stream $ -> [1 => stream]
+stream $ -> [2 => stream]
+// Here, both `$` operators would pass at the same time, and the result would be unordered.
+// However, here the result would be ordered:
++stream
+stream $ -> [1 => stream]
+stream $$ -> [2 => stream]
 
-// How do you sort a stream for piping?
-// Needs to be able to sort both the input and function streams.
-// A stream becomes unordered when it is written to, or joined with another stream.
-// To sort a stream:
-my_stream
 
+// Streams are ordered, however the writing operations may run in any order. So "+abc = (1, 2)" is un-ordered.
+// However, there could be a blocking operator that returns a reference to the input stream when the stream is complete.
+// Would only return the first time the stream completes though.
 
 // Can only write to in-scope streams.
 // No, can write anywhere.
@@ -308,3 +315,41 @@ set is everything
 
 	=='=' { => (, +source); }
 }
+
+
+
+
+<= my_stream # -> [
+    true: 123
+    false: 456
+]
+
+External:
+    Processes
+        Get process adrguments
+        Kill/start processes
+    Console output
+    Timeout callback
+    FS
+        Class loader
+    Sockets
+        Protocols (HTTP, FTP, MySql)
+    OS interface
+
+1. Sets are the only collection
+2. Scoped properties (with pointers / references)
+3. Everything is an object, no control structures
+4. Code == Data
+5. Strings are just numbers
+6. Functions can be surrounded by brackets or started with a colon
+7. Asynchronous like javascript
+8. Executes code in callers scope, for exceptions and control structures
+9. String quotes can have any number of characters: '''''abc'''''
+10. Property keys are any objects, not just strings
+11. Forget multithreading for now
+12. No this, only arguments
+13. Query methods that cannot cause side-effects ???
+14. Single generic control structure
+15. Continuous assertions on a variable
+16. Only un-named arguments if they can be re-ordered without affecting function call
+17. Debug log messages like "File contents looks like a filename"

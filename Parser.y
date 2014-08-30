@@ -7,11 +7,11 @@
 
 #include "Parser.h"
 #include "Lexer.h"
-#include "astnode.h"
+#include "astexpr.h"
 
 #include <iostream>
 
-int yyerror(AstNode **expression, yyscan_t scanner, const char *msg) {
+int yyerror(AstExpr **expression, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
 }
 
@@ -31,16 +31,27 @@ typedef void* yyscan_t;
 
 %define api.pure
 %lex-param   { yyscan_t scanner }
-%parse-param { AstNode **expression }
+%parse-param { AstExpr **expression }
 %parse-param { yyscan_t scanner }
 
 %code requires
 {
     #include <string>
-    #include "astnode.h"
+    #include "astexpr.h"
+    #include "astident.h"
+    #include "astnumber.h"
+    #include "astblock.h"
+    #include "astapply.h"
+    #include "astflow.h"
 }
 
-%define api.value.type union
+%union
+{
+    std::string *string;
+    AstBlock *body;
+    AstBlock *block;
+    AstExpr *expr;
+}
 
 %token LAPPLY
 %token RAPPLY
@@ -64,45 +75,45 @@ typedef void* yyscan_t;
 
 %token BREAK
 
-%token <std::string> NUMBER
-%token <std::string> DECL_IDENT
-%token <std::string> IDENTIFIER
+%token <string> NUMBER
+%token <string> DECL_IDENT
+%token <string> IDENTIFIER
 
-%type <AstFunction*> body
-%type <AstFunction*> block
-%type <AstStream*> stream
+%type <body> body
+%type <block> block
+%type <expr> expr
 
 %%
 
 body
-    : %empty { $$ = new AstFunction(); }
-    | stream { $$ = new AstFunction(); $$->add_stream($1); }
-    | body BREAK stream { $$ = $1; $$->add_stream($3); }
+    : %empty { $$ = new AstBlock(); }
+    | expr { $$ = new AstBlock(); $$->add_expr($1); }
+    | body BREAK expr { $$ = $1; $$->add_expr($3); }
     ;
 
 block
-    : LBRACE body RBRACE { $$ = $2; $2->set_type(FUNCTION_MAJOR); }
-    | LBRACKET body RBRACKET { $$ = $2; $2->set_type(FUNCTION_MINOR); }
-    | LPAREN body RPAREN { $$ = $2 /* (...) :=: -> [...] => */; $2->set_type(FUNCTION_MINOR); }
+    : LBRACE body RBRACE { $$ = $2; $2->set_type(AstBlock::TYPE_MAJOR); }
+    | LBRACKET body RBRACKET { $$ = $2; $2->set_type(AstBlock::TYPE_MINOR); }
+    | LPAREN body RPAREN { $$ = $2 /* (...) :=: -> [...] => */; $2->set_type(AstBlock::TYPE_MINOR); }
     ;
 
-stream
-    : DECL_IDENT { $$ = new AstStreamIdent(*$1, true); }
-    | IDENTIFIER { $$ = new AstStreamIdent(*$1, false); }
-    | NUMBER { $$ = new AstStreamNumber(*$1); }
-    | block { $$ = new AstStreamBlock($1); }
-    | stream stream { $$ = $2->apply_to($1); }
-    | stream LAPPLY stream { $$ = $3->apply_to($1); }
-    | stream RAPPLY stream { $$ = $1->apply_to($3); }
-    | stream FLOW stream { $$ = $3->flow_to($1); }
-    | stream LFLOW stream { $$ = $3->flow_to($1); }
-    | stream RFLOW stream { $$ = $1->flow_to($3); }
-    | stream PIPE stream { $$ = $1->pipe_to($3); }
-    | stream LPIPE stream { $$ = $3->pipe_to($1); }
-    | stream RPIPE stream { $$ = $1->pipe_to($3); }
-    | stream STREAM_LEN { $$ = new AstStreamLength($1); }
-    | stream STREAM_FIRST { $$ = new AstStreamFirst($1); }
-    | stream STREAM_LAST { $$ = new AstStreamLast($1); }
+expr
+    : DECL_IDENT { $$ = new AstIdent($1->substr(1), true); }
+    | IDENTIFIER { $$ = new AstIdent(*$1, false); }
+    | NUMBER { $$ = new AstNumber(*$1); }
+    | block { $$ = $1; }
+    | expr expr { $$ = new AstApply($1, $2); }
+    | expr LAPPLY expr { $$ = new AstApply($1, $3); }
+    | expr RAPPLY expr { $$ = new AstApply($3, $1); }
+    | expr FLOW expr { $$ = new AstFlow($1, $3); }
+    | expr LFLOW expr { $$ = new AstFlow($1, $3); }
+    | expr RFLOW expr { $$ = new AstFlow($3, $1); }
+    | expr PIPE expr { /* $$ = new AstPipe($3, $1); */ }
+    | expr LPIPE expr { /* $$ = new AstPipe($1, $3); */ }
+    | expr RPIPE expr { /* $$ = new AstPipe($3, $1); */ }
+    | expr STREAM_LEN { /* $$ = new AstLength($1); */ }
+    | expr STREAM_FIRST { /* $$ = new AstFirst($1); */ }
+    | expr STREAM_LAST { /* $$ = new AstLast($1); */ }
     ;
 
 %%

@@ -9,13 +9,17 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 
-class AstNode
+class AstExpr
 {
-    AstNode();
-    virtual ~AstNode();
+public:
+    AstExpr()
+    {}
 
-    virtual std::string to_string() = 0;
-    virtual llvm::Value *to_code() = 0;
+    virtual ~AstExpr()
+    {}
+
+    //virtual std::string to_string() = 0;
+    //virtual llvm::Value *to_code() = 0;
 };
 
 #endif // ASTNODE_H

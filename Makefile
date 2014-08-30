@@ -3,7 +3,7 @@
 FILES	= Lexer.c Parser.c main.c
 CC	= clang++
 
-CFLAGS	= -g -std=c++11 `llvm-config --cppflags --ldflags --libs core`
+CFLAGS	= -g -std=c++11 -lgmp `llvm-config --cppflags --ldflags --libs core`
 
 all:		$(FILES)
 			$(CC) $(CFLAGS) $(FILES) -o all

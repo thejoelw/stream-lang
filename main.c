@@ -2,19 +2,19 @@
  * main.c file
  */
 
-#include "astnode.h"
+#include "astexpr.h"
 
 #include "Parser.h"
 #include "Lexer.h"
-#include "astnode.h"
+#include "astexpr.h"
 
 #include <stdio.h>
 
-int yyparse(AstNode **expression, yyscan_t scanner);
+int yyparse(AstExpr **expression, yyscan_t scanner);
 
-AstNode *getAST(const char *expr)
+AstExpr *getAST(const char *expr)
 {
-    AstNode *expression;
+    AstExpr *expression;
     yyscan_t scanner;
     YY_BUFFER_STATE state;
 
@@ -37,7 +37,7 @@ AstNode *getAST(const char *expr)
     return expression;
 }
 
-int evaluate(AstNode *e)
+int evaluate(AstExpr *e)
 {
     /*
     switch (e->type) {
@@ -58,7 +58,7 @@ int main(void)
 {
     char test[] = "+my_stream = (1, 2), my_stream <= 3, my_stream -> {in + 1}";
 
-    AstNode *e = NULL;
+    AstExpr *e = NULL;
     int result = 0;
 
     e = getAST(test);
