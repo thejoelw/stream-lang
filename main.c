@@ -10,11 +10,11 @@
 
 #include <stdio.h>
 
-int yyparse(AstExpr **expression, yyscan_t scanner);
+int yyparse(AstFunction **tree, yyscan_t scanner);
 
-AstExpr *getAST(const char *expr)
+AstFunction *getAST(const char *expr)
 {
-    AstExpr *expression;
+    AstFunction *tree;
     yyscan_t scanner;
     YY_BUFFER_STATE state;
 
@@ -25,7 +25,7 @@ AstExpr *getAST(const char *expr)
 
     state = yy_scan_string(expr, scanner);
 
-    if (yyparse(&expression, scanner)) {
+    if (yyparse(&tree, scanner)) {
         // error parsing
         return NULL;
     }
@@ -34,28 +34,25 @@ AstExpr *getAST(const char *expr)
 
     yylex_destroy(scanner);
 
-    return expression;
+    return tree;
 }
 
-int evaluate(AstExpr *e)
+int evaluate(AstFunction *e)
 {
     return 0;
 }
 
 int main(void)
 {
-    char test[] = "+my_stream = (1, 2), my_stream <= 3, my_stream -> {in + 1} =>";
+    char test[] = "+my_stream = (1, 2), my_stream <= 3/* comment */, my_stream -> {in + 1} =>";
 
-    AstExpr *e = NULL;
-    int result = 0;
+    AstFunction *tree = getAST(test);
 
-    e = getAST(test);
-
-    result = evaluate(e);
+    int result = evaluate(tree);
 
     printf("Result of '%s' is %d\n", test, result);
 
-    std::cout << e->to_string() << std::endl;
+    std::cout << tree->to_string() << std::endl;
 
     return 0;
 }

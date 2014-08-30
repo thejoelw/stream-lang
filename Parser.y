@@ -7,11 +7,11 @@
 
 #include "Parser.h"
 #include "Lexer.h"
-#include "astexpr.h"
+#include "astfunction.h"
 
 #include <iostream>
 
-int yyerror(AstExpr **expression, yyscan_t scanner, const char *msg) {
+int yyerror(AstFunction **expression, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
 }
 
@@ -31,7 +31,7 @@ typedef void* yyscan_t;
 
 %define api.pure
 %lex-param   { yyscan_t scanner }
-%parse-param { AstExpr **expression }
+%parse-param { AstFunction **tree }
 %parse-param { yyscan_t scanner }
 
 %code requires
@@ -78,16 +78,23 @@ typedef void* yyscan_t;
 %token <string> DECL_IDENT
 %token <string> IDENTIFIER
 
+%type <function> main
 %type <function> body
 %type <expr> block
 %type <expr> expr
 
+%start main
+
 %%
 
+main
+    : body { *tree = $$ = $1; $1->bind(AstFunction::BindInOut | AstFunction::BindImplicitRel | AstFunction::BindIdentDecl); }
+    ;
+
 body
-    : %empty { *expression = $$ = new AstFunction(); }
-    | expr { *expression = $$ = new AstFunction(); $$->add_expr($1); }
-    | body BREAK expr { *expression = $$ = $1; $$->add_expr($3); }
+    : %empty { $$ = new AstFunction(); }
+    | expr { $$ = new AstFunction(); $$->add_expr($1); }
+    | body BREAK expr { $$ = $1; $$->add_expr($3); }
     ;
 
 block

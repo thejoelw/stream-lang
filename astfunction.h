@@ -10,44 +10,65 @@
 class AstFunction : public AstExpr
 {
 public:
-    enum Type {TypeMajor, TypeMinor};
+    typedef unsigned int BindFlags;
 
-    typedef unsigned int BindFlag;
+    static constexpr BindFlags BindNone        = 0;
 
     // Binds the literal in/out keywords to the function's input/output streams:
     // {in => out}
-    static constexpr BindFlag BindInOut       = 0x01;
+    static constexpr BindFlags BindInOut       = 1 << 0;
 
     // Binds implicit relation calls to the function's input/output streams:
     // {-> my_stream}
     // {my_stream =>}
-    static constexpr BindFlag BindImplicitRel = 0x02;
+    static constexpr BindFlags BindImplicitRel = 1 << 1;
 
     // Binds identifier declarations to a new stream in the current function's scope:
     // {+my_stream}
-    static constexpr BindFlag BindIdentDecl   = 0x04;
+    static constexpr BindFlags BindIdentDecl   = 1 << 2;
 
     // Binds automatic streaming to the function's output stream:
     // [123]
-    static constexpr BindFlag BindAutoOut     = 0x08;
+    static constexpr BindFlags BindAutoOut     = 1 << 3;
 
+    /*
+    friend AstFunction::BindFlag operator|(AstFunction::BindFlag a, AstFunction::BindFlag b);
+    friend AstFunction::BindFlag operator&(AstFunction::BindFlag a, AstFunction::BindFlag b);
+    friend AstFunction::BindFlag operator^(AstFunction::BindFlag a, AstFunction::BindFlag b);
+    friend AstFunction::BindFlag operator~(AstFunction::BindFlag a);
+    friend AstFunction::BindFlag operator|=(AstFunction::BindFlag &a, AstFunction::BindFlag b);
+    friend AstFunction::BindFlag operator&=(AstFunction::BindFlag &a, AstFunction::BindFlag b);
+    friend AstFunction::BindFlag operator^=(AstFunction::BindFlag &a, AstFunction::BindFlag b);
+    */
 
-    AstFunction(Type type = TypeMajor)
-        : type(type)
+    AstFunction()
     {}
-
-    void set_type(Type type)
-    {
-        this->type = type;
-    }
 
     void add_expr(AstExpr *expr)
     {
         exprs.push_back(expr);
     }
 
-    void bind(BindFlag flag)
+    void bind(BindFlags flag)
     {
+        flag &= ~bound;
+        bound |= flag;
+
+        if (flag & BindInOut)
+        {
+        }
+
+        if (flag & BindImplicitRel)
+        {
+        }
+
+        if (flag & BindIdentDecl)
+        {
+        }
+
+        if (flag & BindAutoOut)
+        {
+        }
     }
 
     std::string to_string(unsigned int indent = 0)
@@ -67,13 +88,16 @@ public:
             i++;
         }
 
-        switch (type)
+        switch (bound)
         {
-        case TypeMajor:
+        case AstFunction::BindInOut | AstFunction::BindImplicitRel | AstFunction::BindIdentDecl:
             return "{" + str + indent_block + "}";
 
-        case TypeMinor:
+        case AstFunction::BindImplicitRel | AstFunction::BindAutoOut:
             return "[" + str + indent_block + "]";
+
+        case AstFunction::BindAutoOut:
+            return "(" + str + indent_block + ")";
 
         default:
             return std::string("<< Unknown block type >>");
@@ -81,7 +105,7 @@ public:
     }
 
 protected:
-    Type type;
+    BindFlags bound = BindNone;
     std::vector<AstExpr*> exprs;
 };
 

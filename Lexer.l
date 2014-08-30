@@ -31,7 +31,16 @@ IDNT_CONT   [a-zA-Z_0-9]
 IDNT_SYMBOL [~!@$%^&*_+\-=|;<>?/]
 IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
 
+%x comment
+
 %%
+
+"/*"            BEGIN(comment);
+<comment>{
+    [^*]*       /* eat anything that's not a '*' */
+    "*"+[^*/]*  /* eat up '*'s not followed by '/'s */
+    "*"+"/"     BEGIN(0);
+}
 
 "<-"        { printf("return LAPPLY;\n"); return LAPPLY; }
 "->"        { printf("return RAPPLY;\n"); return RAPPLY; }

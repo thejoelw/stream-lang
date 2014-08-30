@@ -8,6 +8,7 @@ class AstIdent : public AstExpr
 public:
     AstIdent(std::string symbol, bool declare = false)
         : symbol(symbol)
+        , declare(declare)
     {}
 
     std::string to_string(unsigned int indent = 0)
