@@ -26,7 +26,7 @@ typedef void* yyscan_t;
 
 }
 
-%output  "Parser.c"
+%output  "Parser.cpp"
 %defines "Parser.h"
 
 %define api.pure

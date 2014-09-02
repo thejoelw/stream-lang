@@ -1,18 +1,18 @@
 # Makefile
 
-FILES	= Lexer.c Parser.c main.c astexpr.cpp astapply.cpp astflow.cpp astfunction.cpp astident.cpp astnumber.cpp bignum.cpp
-CC	= clang++
+FILES   = Lexer.cpp Parser.cpp main.c astexpr.cpp astapply.cpp astflow.cpp astfunction.cpp astident.cpp astnumber.cpp bignum.cpp stream.cpp
+CC  = clang++
 
-CFLAGS	= -g -std=c++11 -lgmp `llvm-config --cppflags --ldflags --libs core`
+CFLAGS  = -g -std=c++11 -lgmp `llvm-config --cppflags --ldflags --libs core`
 
-all:		$(FILES)
-			$(CC) $(CFLAGS) $(FILES) -o all
+stream-lang:		$(FILES)
+			$(CC) $(CFLAGS) $(FILES) -o stream-lang
 
-Lexer.c:	Lexer.l 
+Lexer.cpp:	Lexer.l 
 			flex Lexer.l
 
-Parser.c:	Parser.y Lexer.c
+Parser.cpp:	Parser.y Lexer.cpp
 			bison Parser.y
 
 clean:
-			rm -f *.o *~ Lexer.c Lexer.h Parser.c Parser.h all
+			rm -f *.o *~ Lexer.cpp Lexer.h Parser.cpp Parser.h stream-lang

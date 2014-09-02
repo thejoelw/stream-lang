@@ -3,9 +3,13 @@
 
 #include "astexpr.h"
 
+#include "stream.h"
+
 #define TO_STRING_INDENT_CHAR ' '
 #define TO_STRING_INDENT_REPEAT 4
 #define TO_STRING_EXPR_BREAK "\n"
+
+class Stream;
 
 class AstFunction : public AstExpr
 {
@@ -49,27 +53,9 @@ public:
         exprs.push_back(expr);
     }
 
-    void bind(BindFlags flag)
-    {
-        flag &= ~bound;
-        bound |= flag;
+    void bind(BindFlags flag);
 
-        if (flag & BindInOut)
-        {
-        }
-
-        if (flag & BindImplicitRel)
-        {
-        }
-
-        if (flag & BindIdentDecl)
-        {
-        }
-
-        if (flag & BindAutoOut)
-        {
-        }
-    }
+    void call(AstFunction *in, Stream *out);
 
     std::string to_string(unsigned int indent = 0)
     {
