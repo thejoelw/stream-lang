@@ -1,25 +1,23 @@
 #include "astflow.h"
 
-void AstFlow::hoist_ident_decl(AstBlock *scope)
+void AstFlow::apply_bind(AstBlock *scope)
 {
-    source->hoist_ident_decl(scope);
-    target->hoist_ident_decl(scope);
+    source->apply_bind(scope);
+    target->apply_bind(scope);
 }
 
-void AstFlow::apply_bind(BindDesc bind_desc)
+void AstFlow::set_stack_start(unsigned int stack_size)
 {
-    source->apply_bind(bind_desc);
-    target->apply_bind(bind_desc);
+    source->set_stack_start(stack_size);
+    target->set_stack_start(stack_size);
 }
 
 Stream *AstFlow::execute(Context *context)
 {
-    Stream *res = new Stream();
-
     Stream *source_stream = source->execute(context);
     Stream *target_stream = target->execute(context);
 
-    source_stream->set_flows_to(target_stream, res);
+    source_stream->set_flows_to(target_stream);
 
-    return res;
+    return target_stream;
 }

@@ -1,22 +1,19 @@
 #include "astident.h"
 
-void AstIdent::hoist_ident_decl(AstBlock *scope)
+void AstIdent::apply_bind(AstBlock *scope)
 {
-    if (declare)
-    {
-        scope->add_decl(symbol);
-    }
+    stack_id = scope->hoist_ident(symbol, declare);
 }
 
-void AstIdent::apply_bind(BindDesc bind_desc)
+void AstIdent::set_stack_start(unsigned int stack_size)
 {
-    stack_id = bind_desc.ident_decl->resolve_ident(symbol);
 }
 
 Stream *AstIdent::execute(Context *context)
 {
-    return context->resolve(stack_id);
+    return (*context)[stack_id];
 }
 
-AstIdent * const AstIdent::ImplicitIn = new AstIdent("/* << implicit in >> */");
-AstIdent * const AstIdent::ImplicitOut = new AstIdent("/* << implicit out >> */");
+const std::string AstIdent::ImplicitIn = "/* << implicit in >> */";
+const std::string AstIdent::ImplicitOut = "/* << implicit out >> */";
+const std::string AstIdent::AutoOut = "/* << auto out >> */";

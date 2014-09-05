@@ -15,23 +15,10 @@
 #include "stream.h"
 #include "context.h"
 
+class AstBlock;
+
 class AstExpr
 {
-protected:
-    struct BindDesc
-    {
-        Stream *exp_in;
-        Stream *exp_out;
-
-        Stream *imp_in;
-        Stream *imp_out;
-
-        Stream *auto_out;
-
-        unsigned int stack_start;
-        AstBlock *ident_decl;
-    };
-
 public:
     AstExpr()
     {}
@@ -41,8 +28,8 @@ public:
 
     void init();
 
-    virtual void hoist_ident_decl(AstBlock *scope) = 0;
-    virtual void apply_bind(BindDesc bind_desc) = 0;
+    virtual void apply_bind(AstBlock *scope) = 0;
+    virtual void set_stack_start(unsigned int stack_size) = 0;
 
     virtual Stream *execute(Context *context) = 0;
 

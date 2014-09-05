@@ -5,19 +5,22 @@
 
 #include "astblock.h"
 #include "context.h"
+#include "stream.h"
 
-class AstBlock;
+class AstExpr;
 
 class Closure
 {
 public:
-    Closure(AstBlock *func, Context *context)
-        : func(func)
+    Closure(std::vector<AstExpr*> &exprs, Context *context)
+        : exprs(exprs)
         , context(*context)
     {}
 
+    Stream *execute(Closure *in);
+
 protected:
-    AstBlock *func;
+    std::vector<AstExpr*> &exprs;
     Context context;
 };
 

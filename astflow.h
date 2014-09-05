@@ -11,8 +11,8 @@ public:
         , source(source)
     {}
 
-    void hoist_ident_decl(AstBlock *scope);
-    void apply_bind(BindDesc bind_desc);
+    void apply_bind(AstBlock *scope);
+    void set_stack_start(unsigned int stack_size);
 
     Stream *execute(Context *context);
 

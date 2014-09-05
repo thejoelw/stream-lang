@@ -11,8 +11,8 @@ public:
         , declare(declare)
     {}
 
-    void hoist_ident_decl(AstBlock *scope);
-    void apply_bind(BindDesc bind_desc);
+    void apply_bind(AstBlock *scope);
+    void set_stack_start(unsigned int stack_size);
 
     Stream *execute(Context *context);
 
@@ -22,8 +22,9 @@ public:
         else {return symbol;}
     }
 
-    static AstIdent * const ImplicitIn;
-    static AstIdent * const ImplicitOut;
+    static const std::string ImplicitIn;
+    static const std::string ImplicitOut;
+    static const std::string AutoOut;
 
 protected:
     std::string symbol;

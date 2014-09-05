@@ -47,7 +47,7 @@ typedef void* yyscan_t;
 
 %union
 {
-    std::string *string;
+    std::string *str;
     AstBlock *function;
     AstExpr *expr;
 }
@@ -74,9 +74,9 @@ typedef void* yyscan_t;
 
 %token BREAK
 
-%token <string> NUMBER
-%token <string> DECL_IDENT
-%token <string> IDENTIFIER
+%token <str> NUMBER
+%token <str> DECL_IDENT
+%token <str> IDENTIFIER
 
 %type <function> main
 %type <function> body
@@ -88,7 +88,7 @@ typedef void* yyscan_t;
 %%
 
 main
-    : body { *tree = $$ = $1; $1->bind(AstBlock::BindInOut | AstBlock::BindImplicitRel | AstBlock::BindIdentDecl); }
+    : body { *tree = $$ = $1; $1->set_bind(AstBlock::BindInOut | AstBlock::BindImplicitRel | AstBlock::BindIdentDecl); }
     ;
 
 body
@@ -98,9 +98,9 @@ body
     ;
 
 block
-    : LBRACE body RBRACE { $$ = $2; $2->bind(AstBlock::BindInOut | AstBlock::BindImplicitRel | AstBlock::BindIdentDecl); }
-    | LBRACKET body RBRACKET { $$ = $2; $2->bind(AstBlock::BindImplicitRel | AstBlock::BindAutoOut); }
-    | LPAREN body RPAREN { $$ = new AstApply($2, AstIdent::ImplicitIn); $2->bind(AstBlock::BindAutoOut); }
+    : LBRACE body RBRACE { $$ = $2; $2->set_bind(AstBlock::BindInOut | AstBlock::BindImplicitRel | AstBlock::BindIdentDecl); }
+    | LBRACKET body RBRACKET { $$ = $2; $2->set_bind(AstBlock::BindImplicitRel | AstBlock::BindAutoOut); }
+    | LPAREN body RPAREN { $$ = new AstApply($2, new AstIdent(AstIdent::ImplicitIn)); $2->set_bind(AstBlock::BindAutoOut); }
     ;
 
 expr
@@ -122,35 +122,35 @@ expr
     | expr STREAM_FIRST { /* $$ = new AstFirst($1); */ }
     | expr STREAM_LAST { /* $$ = new AstLast($1); */ }
 
-    | LAPPLY expr { $$ = new AstApply(AstIdent::ImplicitOut, $2); }
-    | RAPPLY expr { $$ = new AstApply($2, AstIdent::ImplicitIn); }
-    | FLOW expr { $$ = new AstFlow(AstIdent::ImplicitOut, $2); }
-    | LFLOW expr { $$ = new AstFlow(AstIdent::ImplicitOut, $2); }
-    | RFLOW expr { $$ = new AstFlow($2, AstIdent::ImplicitIn); }
-    | PIPE expr { /* $$ = new AstPipe($2, AstIdent::ImplicitIn); */ }
-    | LPIPE expr { /* $$ = new AstPipe(AstIdent::ImplicitOut, $2); */ }
-    | RPIPE expr { /* $$ = new AstPipe($2, AstIdent::ImplicitIn); */ }
-    | STREAM_LEN { /* $$ = new AstLength(AstIdent::ImplicitIn); */ }
-    | STREAM_FIRST { /* $$ = new AstFirst(AstIdent::ImplicitIn); */ }
-    | STREAM_LAST { /* $$ = new AstLast(AstIdent::ImplicitIn); */ }
+    | LAPPLY expr { $$ = new AstApply(new AstIdent(AstIdent::ImplicitOut), $2); }
+    | RAPPLY expr { $$ = new AstApply($2, new AstIdent(AstIdent::ImplicitIn)); }
+    | FLOW expr { $$ = new AstFlow(new AstIdent(AstIdent::ImplicitOut), $2); }
+    | LFLOW expr { $$ = new AstFlow(new AstIdent(AstIdent::ImplicitOut), $2); }
+    | RFLOW expr { $$ = new AstFlow($2, new AstIdent(AstIdent::ImplicitIn)); }
+    | PIPE expr { /* $$ = new AstPipe($2, new AstIdent(AstIdent::ImplicitIn)); */ }
+    | LPIPE expr { /* $$ = new AstPipe(new AstIdent(AstIdent::ImplicitOut), $2); */ }
+    | RPIPE expr { /* $$ = new AstPipe($2, new AstIdent(AstIdent::ImplicitIn)); */ }
+    | STREAM_LEN { /* $$ = new AstLength(new AstIdent(AstIdent::ImplicitIn)); */ }
+    | STREAM_FIRST { /* $$ = new AstFirst(new AstIdent(AstIdent::ImplicitIn)); */ }
+    | STREAM_LAST { /* $$ = new AstLast(new AstIdent(AstIdent::ImplicitIn)); */ }
 
-    | expr LAPPLY { $$ = new AstApply($1, AstIdent::ImplicitIn); }
-    | expr RAPPLY { $$ = new AstApply(AstIdent::ImplicitOut, $1); }
-    | expr FLOW { $$ = new AstFlow($1, AstIdent::ImplicitIn); }
-    | expr LFLOW { $$ = new AstFlow($1, AstIdent::ImplicitIn); }
-    | expr RFLOW { $$ = new AstFlow(AstIdent::ImplicitOut, $1); }
-    | expr PIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, $1); */ }
-    | expr LPIPE { /* $$ = new AstPipe($1, AstIdent::ImplicitIn); */ }
-    | expr RPIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, $1); */ }
+    | expr LAPPLY { $$ = new AstApply($1, new AstIdent(AstIdent::ImplicitIn)); }
+    | expr RAPPLY { $$ = new AstApply(new AstIdent(AstIdent::ImplicitOut), $1); }
+    | expr FLOW { $$ = new AstFlow($1, new AstIdent(AstIdent::ImplicitIn)); }
+    | expr LFLOW { $$ = new AstFlow($1, new AstIdent(AstIdent::ImplicitIn)); }
+    | expr RFLOW { $$ = new AstFlow(new AstIdent(AstIdent::ImplicitOut), $1); }
+    | expr PIPE { /* $$ = new AstPipe(new AstIdent(AstIdent::ImplicitOut), $1); */ }
+    | expr LPIPE { /* $$ = new AstPipe($1, new AstIdent(AstIdent::ImplicitIn)); */ }
+    | expr RPIPE { /* $$ = new AstPipe(new AstIdent(AstIdent::ImplicitOut), $1); */ }
 
-    | LAPPLY { $$ = new AstApply(AstIdent::ImplicitOut, AstIdent::ImplicitIn); }
-    | RAPPLY { $$ = new AstApply(AstIdent::ImplicitOut, AstIdent::ImplicitOut); }
-    | FLOW { $$ = new AstFlow(AstIdent::ImplicitOut, AstIdent::ImplicitIn); }
-    | LFLOW { $$ = new AstFlow(AstIdent::ImplicitOut, AstIdent::ImplicitIn); }
-    | RFLOW { $$ = new AstFlow(AstIdent::ImplicitOut, AstIdent::ImplicitOut); }
-    | PIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, AstIdent::ImplicitOut); */ }
-    | LPIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, AstIdent::ImplicitIn); */ }
-    | RPIPE { /* $$ = new AstPipe(AstIdent::ImplicitOut, AstIdent::ImplicitOut); */ }
+    | LAPPLY { $$ = new AstApply(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); }
+    | RAPPLY { $$ = new AstApply(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); }
+    | FLOW { $$ = new AstFlow(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); }
+    | LFLOW { $$ = new AstFlow(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); }
+    | RFLOW { $$ = new AstFlow(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); }
+    | PIPE { /* $$ = new AstPipe(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); */ }
+    | LPIPE { /* $$ = new AstPipe(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); */ }
+    | RPIPE { /* $$ = new AstPipe(new AstIdent(AstIdent::ImplicitOut), new AstIdent(AstIdent::ImplicitIn)); */ }
     ;
 
 %%

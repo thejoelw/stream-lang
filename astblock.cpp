@@ -1,5 +1,8 @@
 #include "astblock.h"
 
+#include "astident.h"
+#include "astflow.h"
+
 /*
 AstBlock::BindFlag operator|(AstFunction::BindFlag a, AstFunction::BindFlag b)
 { return static_cast<AstFunction::BindFlag>(static_cast<int>(a) | static_cast<int>(b)); }
@@ -28,123 +31,113 @@ void AstBlock::set_bind(const BindFlags flags)
     bind |= flags;
 }
 
-void AstBlock::hoist_ident_decl(AstBlock *scope)
+void AstBlock::apply_bind(AstBlock *scope)
 {
     parent_scope = scope;
 
-    if (bind & BindIdentDecl)
-    {
-        scope = this;
-    }
-
-    std::vector<AstExpr*>::iterator i = exprs.begin();
-    while (i != exprs.end())
-    {
-        (*i)->hoist_ident_decl(scope);
-        i++;
-    }
-}
-
-void AstBlock::apply_bind(BindDesc bind_desc)
-{
-    stack_start = bind_desc.stack_start;
-    bind_desc.stack_start += declared_symbols.size();
-
     if (bind & BindInOut)
     {
-        //bind_desc.exp_in = 12345678;
+        declared_symbols.push_back("in");
+        declared_symbols.push_back("out");
     }
 
     if (bind & BindImplicitRel)
     {
-
+        declared_symbols.push_back(AstIdent::ImplicitIn);
+        declared_symbols.push_back(AstIdent::ImplicitOut);
     }
 
     if (bind & BindAutoOut)
     {
+        declared_symbols.push_back(AstIdent::AutoOut);
 
+        std::vector<AstExpr*>::iterator i = exprs.begin();
+        while (i != exprs.end())
+        {
+            *i = new AstFlow(new AstIdent(AstIdent::AutoOut), *i);
+            i++;
+        }
     }
 
-    if (bind & BindIdentDecl)
-    {
-        hoist_ident_decl(this);
-        bind_desc.ident_decl = this;
-    }
-
-    /*
-    struct BindDesc
-    {
-        Stream *exp_in;
-        Stream *exp_out;
-
-        Stream *imp_in;
-        Stream *imp_out;
-
-        Stream *auto_out;
-
-        unsigned int stack_start;
-        AstFunction *ident_decl;
-    };
-    */
+    bind_ident_decl = bind & BindIdentDecl;
 
     std::vector<AstExpr*>::iterator i = exprs.begin();
     while (i != exprs.end())
     {
-        (*i)->apply_bind(bind_desc);
+        (*i)->apply_bind(scope);
         i++;
     }
 }
 
-Stream *AstBlock::execute(Context *context)
+void AstBlock::set_stack_start(unsigned int stack_size)
 {
-    Closure *closure = new Closure(this, context);
-
-    Stream *res = new Stream();
-    res->add_func(func);
-    return res;
+    stack_start = stack_size;
+    stack_size += declared_symbols.size();
 }
 
-void AstBlock::call(Context *context)
+unsigned int AstBlock::hoist_ident(std::string symbol, bool declare)
 {
-    Context *new_context = context->new_frame(declared_symbols.size());
+    unsigned int index = static_cast<unsigned int>(-1);
 
-    Stream *res = new Stream();
-
-    std::vector<AstExpr*>::iterator i = exprs.begin();
-    while (i != exprs.end())
-    {
-        (*i)->execute(new_context)->set_flows_to(res);
-        i++;
-    }
-
-    return res;
-}
-
-
-void AstBlock::add_decl(std::string symbol)
-{
-    declared_symbols.push_back(symbol);
-}
-
-unsigned int AstBlock::resolve_ident(std::string symbol)
-{
     std::vector<std::string>::iterator i = declared_symbols.begin();
     while (i != declared_symbols.end())
     {
         if (*i == symbol)
         {
-            return stack_start + (i - declared_symbols.begin());
+            index = i - declared_symbols.begin();
+            break;
         }
         i++;
     }
 
-    if (parent_scope)
+    if (declare)
     {
-        return parent_scope->resolve_ident(symbol);
+        if (bind_ident_decl)
+        {
+            if (index == -1)
+            {
+                index = declared_symbols.size();
+                declared_symbols.push_back(symbol);
+            }
+            else
+            {
+                std::cerr << "Identifier \"" << symbol << "\" is declared twice in this scope" << std::endl;
+            }
+        }
+        else
+        {
+            if (index != -1)
+            {
+                std::cerr << "Identifier \"" << symbol << "\" is shadowed by another declaration of the same name" << std::endl;
+                index = -1;
+            }
+        }
+    }
+
+    if (index != -1)
+    {
+        return stack_start + index;
     }
     else
     {
-        std::cerr << "Identifier \"" << symbol << "\" not declared in this scope." << std::endl;
-        return 0;
+        if (parent_scope)
+        {
+            return parent_scope->hoist_ident(symbol, declare);
+        }
+        else
+        {
+            std::cerr << "Identifier \"" << symbol << "\" is not declared in this scope" << std::endl;
+            return 0;
+        }
     }
+}
+
+
+Stream *AstBlock::execute(Context *context)
+{
+    Closure *closure = new Closure(exprs, context);
+
+    Stream *res = new Stream();
+    res->flow_from(closure);
+    return res;
 }

@@ -11,12 +11,13 @@ public:
     Stream()
     {}
 
-    void apply_from(Closure *func); // this <- func
+    Stream *apply_to(Closure *func); // this -> func
+    Stream *apply_from(Closure *func); // this <- func
     void flow_from(Closure *func); // this <= func
 
-    void set_applies_to(Stream *stream, Stream *out);
-    void set_applies_from(Stream *stream, Stream *out);
-    void set_flows_to(Stream *stream, Stream *out);
+    void set_applies_to(Stream *stream, Stream *out); // this -> func
+    void set_applies_from(Stream *stream, Stream *out); // this <- func
+    void set_flows_to(Stream *stream); // this => func
 
 protected:
     std::vector<Closure*> funcs;

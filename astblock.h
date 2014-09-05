@@ -53,13 +53,12 @@ public:
 
     void set_bind(const BindFlags flags);
 
-    void hoist_ident_decl(AstBlock *scope);
-    void apply_bind(BindDesc bind_desc);
+    void apply_bind(AstBlock *scope);
+    void set_stack_start(unsigned int stack_size);
+
+    unsigned int hoist_ident(std::string symbol, bool declare);
 
     Stream *execute(Context *context);
-
-    void add_decl(std::string symbol);
-    unsigned int resolve_ident(std::string symbol);
 
     std::string to_string(unsigned int indent = 0)
     {
@@ -98,11 +97,9 @@ protected:
     BindFlags bind = BindNone;
 
     AstBlock *parent_scope;
+    bool bind_ident_decl;
     unsigned int stack_start;
     std::vector<std::string> declared_symbols;
-
-    Stream *in_stream;
-    Stream *out_stream;
 
     std::vector<AstExpr*> exprs;
 };

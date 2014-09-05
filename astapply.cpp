@@ -1,15 +1,15 @@
 #include "astapply.h"
 
-void AstApply::hoist_ident_decl(AstBlock *scope)
+void AstApply::apply_bind(AstBlock *scope)
 {
-    func->hoist_ident_decl(scope);
-    input->hoist_ident_decl(scope);
+    func->apply_bind(scope);
+    input->apply_bind(scope);
 }
 
-void AstApply::apply_bind(BindDesc bind_desc)
+void AstApply::set_stack_start(unsigned int stack_size)
 {
-    func->apply_bind(bind_desc);
-    input->apply_bind(bind_desc);
+    func->set_stack_start(stack_size);
+    input->set_stack_start(stack_size);
 }
 
 Stream *AstApply::execute(Context *context)
