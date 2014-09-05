@@ -7,11 +7,11 @@
 
 #include "Parser.h"
 #include "Lexer.h"
-#include "astfunction.h"
+#include "astblock.h"
 
 #include <iostream>
 
-int yyerror(AstFunction **expression, yyscan_t scanner, const char *msg) {
+int yyerror(AstBlock **expression, yyscan_t scanner, const char *msg) {
     // Add error handling routine as needed
 }
 
@@ -31,7 +31,7 @@ typedef void* yyscan_t;
 
 %define api.pure
 %lex-param   { yyscan_t scanner }
-%parse-param { AstFunction **tree }
+%parse-param { AstBlock **tree }
 %parse-param { yyscan_t scanner }
 
 %code requires
@@ -40,7 +40,7 @@ typedef void* yyscan_t;
     #include "astexpr.h"
     #include "astident.h"
     #include "astnumber.h"
-    #include "astfunction.h"
+    #include "astblock.h"
     #include "astapply.h"
     #include "astflow.h"
 }
@@ -48,7 +48,7 @@ typedef void* yyscan_t;
 %union
 {
     std::string *string;
-    AstFunction *function;
+    AstBlock *function;
     AstExpr *expr;
 }
 
@@ -88,19 +88,19 @@ typedef void* yyscan_t;
 %%
 
 main
-    : body { *tree = $$ = $1; $1->bind(AstFunction::BindInOut | AstFunction::BindImplicitRel | AstFunction::BindIdentDecl); }
+    : body { *tree = $$ = $1; $1->bind(AstBlock::BindInOut | AstBlock::BindImplicitRel | AstBlock::BindIdentDecl); }
     ;
 
 body
-    : %empty { $$ = new AstFunction(); }
-    | expr { $$ = new AstFunction(); $$->add_expr($1); }
+    : %empty { $$ = new AstBlock(); }
+    | expr { $$ = new AstBlock(); $$->add_expr($1); }
     | body BREAK expr { $$ = $1; $$->add_expr($3); }
     ;
 
 block
-    : LBRACE body RBRACE { $$ = $2; $2->bind(AstFunction::BindInOut | AstFunction::BindImplicitRel | AstFunction::BindIdentDecl); }
-    | LBRACKET body RBRACKET { $$ = $2; $2->bind(AstFunction::BindImplicitRel | AstFunction::BindAutoOut); }
-    | LPAREN body RPAREN { $$ = new AstApply($2, AstIdent::ImplicitIn); $2->bind(AstFunction::BindAutoOut); }
+    : LBRACE body RBRACE { $$ = $2; $2->bind(AstBlock::BindInOut | AstBlock::BindImplicitRel | AstBlock::BindIdentDecl); }
+    | LBRACKET body RBRACKET { $$ = $2; $2->bind(AstBlock::BindImplicitRel | AstBlock::BindAutoOut); }
+    | LPAREN body RPAREN { $$ = new AstApply($2, AstIdent::ImplicitIn); $2->bind(AstBlock::BindAutoOut); }
     ;
 
 expr

@@ -3,24 +3,23 @@
 
 #include <vector>
 
-#include "astfunction.h"
-
-class AstFunction;
+#include "closure.h"
 
 class Stream
 {
 public:
-    Stream();
+    Stream()
+    {}
 
-    void apply_from(AstFunction *func); // this <- func
-    void flow_from(AstFunction *func); // this <= func
+    void apply_from(Closure *func); // this <- func
+    void flow_from(Closure *func); // this <= func
 
-    void set_applies_to(Stream *stream);
-    void set_applies_from(Stream *stream);
-    void set_flows_to(Stream *stream);
+    void set_applies_to(Stream *stream, Stream *out);
+    void set_applies_from(Stream *stream, Stream *out);
+    void set_flows_to(Stream *stream, Stream *out);
 
 protected:
-    std::vector<AstFunction*> funcs;
+    std::vector<Closure*> funcs;
 
     std::vector<Stream*> applies_to;
     std::vector<Stream*> applies_from;

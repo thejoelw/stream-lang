@@ -1,10 +1,6 @@
 #include "stream.h"
 
-Stream::Stream()
-{
-}
-
-void Stream::apply_from(AstFunction *in, Stream *out)
+void Stream::apply_from(Closure *in, Stream *out)
 {
     std::vector<AstFunction*>::iterator i = funcs.begin();
     while (i != funcs.end())
@@ -15,7 +11,7 @@ void Stream::apply_from(AstFunction *in, Stream *out)
     }
 }
 
-void Stream::flow_from(AstFunction *func)
+void Stream::flow_from(Closure *func)
 {
     funcs.push_back(func);
 
@@ -28,14 +24,14 @@ void Stream::flow_from(AstFunction *func)
     }
 }
 
-void Stream::set_applies_to(Stream *stream)
+void Stream::set_applies_to(Stream *stream, Stream *out)
 {
 }
 
-void Stream::set_applies_from(Stream *stream)
+void Stream::set_applies_from(Stream *stream, Stream *out)
 {
 }
 
-void Stream::set_flows_to(Stream *stream)
+void Stream::set_flows_to(Stream *stream, Stream *out)
 {
 }

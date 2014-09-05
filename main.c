@@ -2,19 +2,19 @@
  * main.c file
  */
 
-#include "astexpr.h"
+#include "astblock.h"
+#include "stream.h"
 
 #include "Parser.h"
 #include "Lexer.h"
-#include "astexpr.h"
 
 #include <stdio.h>
 
-int yyparse(AstFunction **tree, yyscan_t scanner);
+int yyparse(AstBlock **tree, yyscan_t scanner);
 
-AstFunction *getAST(const char *expr)
+AstBlock *getAST(const char *expr)
 {
-    AstFunction *tree;
+    AstBlock *tree;
     yyscan_t scanner;
     YY_BUFFER_STATE state;
 
@@ -37,16 +37,27 @@ AstFunction *getAST(const char *expr)
     return tree;
 }
 
-int evaluate(AstFunction *e)
+int evaluate(AstBlock *e)
 {
     return 0;
 }
 
 int main(void)
 {
-    char test[] = "+my_stream = (1, 2), my_stream <= 3/* comment */, my_stream -> {in + 1} =>";
+    char parse_test[] = "+my_stream = (1, 2), my_stream <= 3/* comment */, my_stream -> {in + 1} =>";
+    char closure_test[] = "+class = {=> +local, [local /* stack_id: 1 */] =>}, +closure = class 123, closure[] =>";
 
-    AstFunction *tree = getAST(test);
+    char *test = closure_test;
+
+    AstBlock *tree = getAST(test);
+
+    AstBlock *input = new AstBlock();
+    input->apply_bind();
+
+    Stream *output = new Stream();
+    //output->on_flow();
+
+    tree->call(0, input, output);
 
     int result = evaluate(tree);
 

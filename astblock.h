@@ -9,9 +9,7 @@
 #define TO_STRING_INDENT_REPEAT 4
 #define TO_STRING_EXPR_BREAK "\n"
 
-class Stream;
-
-class AstFunction : public AstExpr
+class AstBlock : public AstExpr
 {
 public:
     typedef unsigned int BindFlags;
@@ -27,13 +25,13 @@ public:
     // {my_stream =>}
     static constexpr BindFlags BindImplicitRel = 1 << 1;
 
-    // Binds identifier declarations to a new stream in the current function's scope:
-    // {+my_stream}
-    static constexpr BindFlags BindIdentDecl   = 1 << 2;
-
     // Binds automatic streaming to the function's output stream:
     // [123]
-    static constexpr BindFlags BindAutoOut     = 1 << 3;
+    static constexpr BindFlags BindAutoOut     = 1 << 2;
+
+    // Binds identifier declarations to a new stream in the current function's scope:
+    // {+my_stream}
+    static constexpr BindFlags BindIdentDecl   = 1 << 3;
 
     /*
     friend AstFunction::BindFlag operator|(AstFunction::BindFlag a, AstFunction::BindFlag b);
@@ -45,7 +43,7 @@ public:
     friend AstFunction::BindFlag operator^=(AstFunction::BindFlag &a, AstFunction::BindFlag b);
     */
 
-    AstFunction()
+    AstBlock()
     {}
 
     void add_expr(AstExpr *expr)
@@ -53,9 +51,15 @@ public:
         exprs.push_back(expr);
     }
 
-    void bind(BindFlags flag);
+    void set_bind(const BindFlags flags);
 
-    void call(AstFunction *in, Stream *out);
+    void hoist_ident_decl(AstBlock *scope);
+    void apply_bind(BindDesc bind_desc);
+
+    Stream *execute(Context *context);
+
+    void add_decl(std::string symbol);
+    unsigned int resolve_ident(std::string symbol);
 
     std::string to_string(unsigned int indent = 0)
     {
@@ -74,15 +78,15 @@ public:
             i++;
         }
 
-        switch (bound)
+        switch (bind)
         {
-        case AstFunction::BindInOut | AstFunction::BindImplicitRel | AstFunction::BindIdentDecl:
+        case AstBlock::BindInOut | AstBlock::BindImplicitRel | AstBlock::BindIdentDecl:
             return "{" + str + indent_block + "}";
 
-        case AstFunction::BindImplicitRel | AstFunction::BindAutoOut:
+        case AstBlock::BindImplicitRel | AstBlock::BindAutoOut:
             return "[" + str + indent_block + "]";
 
-        case AstFunction::BindAutoOut:
+        case AstBlock::BindAutoOut:
             return "(" + str + indent_block + ")";
 
         default:
@@ -91,7 +95,15 @@ public:
     }
 
 protected:
-    BindFlags bound = BindNone;
+    BindFlags bind = BindNone;
+
+    AstBlock *parent_scope;
+    unsigned int stack_start;
+    std::vector<std::string> declared_symbols;
+
+    Stream *in_stream;
+    Stream *out_stream;
+
     std::vector<AstExpr*> exprs;
 };
 
