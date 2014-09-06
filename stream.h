@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "closure.h"
+class Closure;
 
 class Stream
 {

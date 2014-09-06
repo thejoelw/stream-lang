@@ -12,10 +12,9 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 
-#include "stream.h"
-#include "context.h"
-
 class AstBlock;
+class Stream;
+class Context;
 
 class AstExpr
 {

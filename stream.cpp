@@ -1,5 +1,7 @@
 #include "stream.h"
 
+#include "closure.h"
+
 Stream *Stream::apply_to(Closure *func)
 {
     Stream *res = new Stream();

@@ -2,6 +2,8 @@
 
 #include "astident.h"
 #include "astflow.h"
+#include "closure.h"
+#include "stream.h"
 
 /*
 AstBlock::BindFlag operator|(AstFunction::BindFlag a, AstFunction::BindFlag b)

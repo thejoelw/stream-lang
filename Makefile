@@ -1,9 +1,8 @@
 # Makefile
 
-FILES   = Lexer.cpp Parser.cpp main.c astexpr.cpp astapply.cpp astflow.cpp astblock.cpp astident.cpp astnumber.cpp bignum.cpp stream.cpp
-CC  = clang++
-
-CFLAGS  = -g -std=c++11 -Wfatal-errors -lgmp `llvm-config --cppflags --ldflags --libs core`
+FILES = main.c astapply.cpp astblock.cpp astexpr.cpp astflow.cpp astident.cpp astnumber.cpp bignum.cpp closure.cpp context.cpp Lexer.cpp Parser.cpp stream.cpp
+CC = clang++
+CFLAGS = -g -std=c++11 -Wfatal-errors -lgmp `llvm-config --cppflags --ldflags --libs core`
 
 all:		stream-lang
 			

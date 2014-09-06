@@ -27,20 +27,23 @@
 
 IDNT_START  [a-zA-Z_]
 IDNT_CONT   [a-zA-Z_0-9]
-/* IDNT_SYMBOL [~!@$%^&*_+\-=|;<>?/] */
-IDNT_SYMBOL [~!@$%^&*_+\-=|;<>?/]
+IDNT_SYMBOL [~!@%&*+\-|;<>?/]
 IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
 
 %x comment
-%x string
+%x str_single_quote
+%x str_double_quote
+%x str_dot
 
 %%
+
+    std::string *string_buf;
 
 "/*"            BEGIN(comment);
 <comment>{
     [^*]*       /* eat anything that's not a '*' */
     "*"+[^*/]*  /* eat up '*'s not followed by '/'s */
-    "*"+"/"     BEGIN(0);
+    "*"+"/"     BEGIN(INITIAL);
 }
 
 "<-"        { printf("return LAPPLY;\n"); return LAPPLY; }
@@ -69,57 +72,47 @@ IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
 "+"{IDNT}   { printf("return DECL_IDENT; // %s\n", yytext); SAVE_TOKEN; return DECL_IDENT; }
 {IDNT}      { printf("return IDENTIFIER; // %s\n", yytext); SAVE_TOKEN; return IDENTIFIER; }
 
-        char string_buf[MAX_STR_CONST];
-        char *string_buf_ptr;
+\'          { string_buf = new std::string(); BEGIN(str_single_quote); }
+\"          { string_buf = new std::string(); BEGIN(str_double_quote); }
+\.          { string_buf = new std::string(); BEGIN(str_dot); }
 
-\"      string_buf_ptr = string_buf; BEGIN(string);
-
-<string>\"        { /* saw closing quote - all done */
-        BEGIN(INITIAL);
-        *string_buf_ptr = '\0';
-        /* return string constant token type and
-         * value to parser
-         */
-        }
-
-<string>\n        {
-        /* error - unterminated string constant */
-        /* generate error message */
-        }
-
-<string>\\[0-7]{1,3} {
+<str_single_quote,str_double_quote,str_dot>{
+    \\[0-7]{1,3} {
         /* octal escape sequence */
-        int result;
+        unsigned int result;
 
-        (void) sscanf( yytext + 1, "%o", &result );
+        sscanf( yytext + 1, "%o", &result );
 
         if ( result > 0xff )
-                /* error, constant is out-of-bounds */
-
-        *string_buf_ptr++ = result;
+        {
+            /* error, constant is out-of-bounds */
         }
 
-<string>\\[0-9]+ {
+        string_buf->append(1, result);
+    }
+
+    \\[0-9]+    {
         /* generate error - bad escape sequence; something
          * like '\48' or '\0777777'
          */
-        }
+    }
 
-<string>\\n  *string_buf_ptr++ = '\n';
-<string>\\t  *string_buf_ptr++ = '\t';
-<string>\\r  *string_buf_ptr++ = '\r';
-<string>\\b  *string_buf_ptr++ = '\b';
-<string>\\f  *string_buf_ptr++ = '\f';
+    \\n        { string_buf->append(1, '\n'); }
+    \\t        { string_buf->append(1, '\t'); }
+    \\r        { string_buf->append(1, '\r'); }
+    \\b        { string_buf->append(1, '\b'); }
+    \\f        { string_buf->append(1, '\f'); }
 
-<string>\\(.|\n)  *string_buf_ptr++ = yytext[1];
+    \\(.|\n)   { string_buf->append(1, yytext[1]); }
+}
 
-<string>[^\\\n\"]+        {
-        char *yptr = yytext;
+<str_single_quote>[^\\\']+  { string_buf->append(yytext); }
+<str_double_quote>[^\\\"]+  { string_buf->append(yytext); }
+<str_dot>[a-zA-Z_0-9]+      { string_buf->append(yytext); }
 
-        while ( *yptr )
-                *string_buf_ptr++ = *yptr++;
-        }
-
+<str_single_quote>\'        { yylval->str = string_buf; BEGIN(INITIAL); return STRING; }
+<str_double_quote>\"        { yylval->str = string_buf; BEGIN(INITIAL); return STRING; }
+<str_dot>[^\\a-zA-Z_0-9]    { yylval->str = string_buf; BEGIN(INITIAL); return STRING; }
 
 .           { printf("Did not recognize: '%s'\n", yytext); }
 

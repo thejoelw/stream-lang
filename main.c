@@ -4,6 +4,7 @@
 
 #include "astblock.h"
 #include "stream.h"
+#include "context.h"
 
 #include "Parser.h"
 #include "Lexer.h"

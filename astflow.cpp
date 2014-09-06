@@ -1,5 +1,7 @@
 #include "astflow.h"
 
+#include "stream.h"
+
 void AstFlow::apply_bind(AstBlock *scope)
 {
     source->apply_bind(scope);
@@ -19,5 +21,5 @@ Stream *AstFlow::execute(Context *context)
 
     source_stream->set_flows_to(target_stream);
 
-    return target_stream;
+    return source_stream;
 }

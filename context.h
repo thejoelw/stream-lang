@@ -3,10 +3,11 @@
 
 #include <vector>
 
-#include "stream.h"
-
 class Stream;
 
-typedef std::vector<Stream*> Context;
+class Context : public std::vector<Stream*>
+{
+    using std::vector<Stream*>::vector;
+};
 
 #endif // CONTEXT_H

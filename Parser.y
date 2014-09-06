@@ -75,6 +75,7 @@ typedef void* yyscan_t;
 %token BREAK
 
 %token <str> NUMBER
+%token <str> STRING
 %token <str> DECL_IDENT
 %token <str> IDENTIFIER
 
@@ -107,6 +108,7 @@ expr
     : DECL_IDENT { $$ = new AstIdent($1->substr(1), true); }
     | IDENTIFIER { $$ = new AstIdent(*$1); }
     | NUMBER { $$ = new AstNumber(*$1); }
+    | STRING { /* $$ = new AstString(*$1); */ }
     | block { $$ = $1; }
     | expr expr { $$ = new AstApply($1, $2); }
 

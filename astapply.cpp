@@ -1,5 +1,7 @@
 #include "astapply.h"
 
+#include "stream.h"
+
 void AstApply::apply_bind(AstBlock *scope)
 {
     func->apply_bind(scope);

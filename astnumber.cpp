@@ -1,5 +1,7 @@
 #include "astnumber.h"
 
+#include "stream.h"
+
 void AstNumber::apply_bind(AstBlock *scope)
 {
 }

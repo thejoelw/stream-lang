@@ -3,8 +3,6 @@
 
 #include "astexpr.h"
 
-#include "stream.h"
-
 #define TO_STRING_INDENT_CHAR ' '
 #define TO_STRING_INDENT_REPEAT 4
 #define TO_STRING_EXPR_BREAK "\n"

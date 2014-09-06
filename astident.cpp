@@ -1,5 +1,7 @@
 #include "astident.h"
 
+#include "context.h"
+
 void AstIdent::apply_bind(AstBlock *scope)
 {
     stack_id = scope->hoist_ident(symbol, declare);

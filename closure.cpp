@@ -1,5 +1,8 @@
 #include "closure.h"
 
+#include "astexpr.h"
+#include "stream.h"
+
 Stream *Closure::execute(Closure *in)
 {
     Context *new_context = new Context(context);
@@ -9,7 +12,7 @@ Stream *Closure::execute(Closure *in)
 
     while (add < add_end)
     {
-        new_context.push_back(add);
+        new_context->push_back(add);
         add++;
     }
 
