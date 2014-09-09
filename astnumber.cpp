@@ -1,6 +1,7 @@
 #include "astnumber.h"
 
 #include "stream.h"
+#include "number.h"
 
 void AstNumber::apply_bind(AstBlock *scope)
 {
@@ -14,9 +15,7 @@ Stream *AstNumber::execute(Context *context)
 {
     Stream *res = new Stream();
 
-    Closure *closure = 0;
-    // TODO: Make closure actually a number
-
+    Object *closure = new Number(stod(number));
     res->flow_from(closure);
 
     return res;

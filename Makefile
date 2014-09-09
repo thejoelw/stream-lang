@@ -1,6 +1,6 @@
 # Makefile
 
-FILES = main.c astapply.cpp astblock.cpp astexpr.cpp astflow.cpp astident.cpp astnumber.cpp bignum.cpp closure.cpp context.cpp Lexer.cpp Parser.cpp stream.cpp
+FILES = main.c astapply.cpp astblock.cpp astexpr.cpp astflow.cpp astident.cpp astnumber.cpp astsame.cpp bignum.cpp closure.cpp context.cpp Lexer.cpp number.cpp object.cpp Parser.cpp stream.cpp
 CC = clang++
 CFLAGS = -g -std=c++11 -Wfatal-errors -lgmp `llvm-config --cppflags --ldflags --libs core`
 

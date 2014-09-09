@@ -15,6 +15,10 @@
 #define SAVE_TOKEN (yylval->str = new std::string(yytext, yyleng));
 #define TOKEN(t) (yylval.token = t)
 
+#pragma clang diagnostic push
+// Ignore about 20 "register storage class specifier is deprecated" warnings from flex code
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+
 %}
 
 %option outfile="Lexer.cpp" header-file="Lexer.h"
@@ -65,6 +69,8 @@ IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
 "#"         { printf("return STREAM_LEN;\n"); return STREAM_LEN; }
 "^"         { printf("return STREAM_FIRST;\n"); return STREAM_FIRST; }
 "$"         { printf("return STREAM_LAST;\n"); return STREAM_LAST; }
+
+"=="        { printf("return SAME;\n"); return SAME; }
 
 [\r\n,]     { printf("return BREAK;\n"); return BREAK; }
 [ \t]*      { printf("Skipping blanks: '%s'\n", yytext); }
@@ -117,6 +123,8 @@ IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
 .           { printf("Did not recognize: '%s'\n", yytext); }
 
 %%
+
+#pragma clang diagnostic pop
 
 int yyerror(const char *msg) {
     fprintf(stderr,"Error:%s\n",msg); return 0;

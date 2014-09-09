@@ -43,6 +43,7 @@ typedef void* yyscan_t;
     #include "astblock.h"
     #include "astapply.h"
     #include "astflow.h"
+    #include "astsame.h"
 }
 
 %union
@@ -72,8 +73,9 @@ typedef void* yyscan_t;
 %token STREAM_FIRST
 %token STREAM_LAST
 
-%token BREAK
+%token SAME
 
+%token BREAK
 %token <str> NUMBER
 %token <str> STRING
 %token <str> DECL_IDENT
@@ -123,6 +125,7 @@ expr
     | expr STREAM_LEN { /* $$ = new AstLength($1); */ }
     | expr STREAM_FIRST { /* $$ = new AstFirst($1); */ }
     | expr STREAM_LAST { /* $$ = new AstLast($1); */ }
+    | expr SAME expr { $$ = new AstSame($1, $3); }
 
     | LAPPLY expr { $$ = new AstApply(new AstIdent(AstIdent::ImplicitOut), $2); }
     | RAPPLY expr { $$ = new AstApply($2, new AstIdent(AstIdent::ImplicitIn)); }

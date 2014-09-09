@@ -3,7 +3,7 @@
 
 #include <vector>
 
-class Closure;
+class Object;
 
 class Stream
 {
@@ -11,16 +11,19 @@ public:
     Stream()
     {}
 
-    Stream *apply_to(Closure *func); // this -> func
-    Stream *apply_from(Closure *func); // this <- func
-    void flow_from(Closure *func); // this <= func
+    Stream *apply_to(Object *func); // this -> func
+    Stream *apply_from(Object *func); // this <- func
+    void flow_from(Object *func); // this <= func
 
     void set_applies_to(Stream *stream, Stream *out); // this -> func
     void set_applies_from(Stream *stream, Stream *out); // this <- func
     void set_flows_to(Stream *stream); // this => func
+    void set_flows_from(Stream *stream); // this <= func
+
+    std::vector<Object*> &get_vector() {return funcs;}
 
 protected:
-    std::vector<Closure*> funcs;
+    std::vector<Object*> funcs;
 
     std::vector<Stream*> applies_to;
     std::vector<Stream*> applies_from;

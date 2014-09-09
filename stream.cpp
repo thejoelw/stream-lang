@@ -2,11 +2,11 @@
 
 #include "closure.h"
 
-Stream *Stream::apply_to(Closure *func)
+Stream *Stream::apply_to(Object *func)
 {
     Stream *res = new Stream();
 
-    std::vector<Closure*>::iterator i = funcs.begin();
+    std::vector<Object*>::iterator i = funcs.begin();
     while (i != funcs.end())
     {
         func->execute(*i)->set_flows_to(res);
@@ -16,11 +16,11 @@ Stream *Stream::apply_to(Closure *func)
     return res;
 }
 
-Stream *Stream::apply_from(Closure *func)
+Stream *Stream::apply_from(Object *func)
 {
     Stream *res = new Stream();
 
-    std::vector<Closure*>::iterator i = funcs.begin();
+    std::vector<Object*>::iterator i = funcs.begin();
     while (i != funcs.end())
     {
         (*i)->execute(func)->set_flows_to(res);
@@ -30,8 +30,10 @@ Stream *Stream::apply_from(Closure *func)
     return res;
 }
 
-void Stream::flow_from(Closure *func)
+void Stream::flow_from(Object *func)
 {
+    // Add a single Closure to this stream.
+
     funcs.push_back(func);
 
     std::vector<Stream*>::iterator i;
@@ -60,17 +62,31 @@ void Stream::flow_from(Closure *func)
 
 void Stream::set_applies_to(Stream *stream, Stream *out)
 {
-    // TODO
+    std::vector<Object*>::iterator i = funcs.begin();
+    while (i != funcs.end())
+    {
+        stream->apply_from(*i)->set_flows_to(out);
+        i++;
+    }
+
+    applies_to.push_back(stream);
 }
 
 void Stream::set_applies_from(Stream *stream, Stream *out)
 {
-    // TODO
+    std::vector<Object*>::iterator i = funcs.begin();
+    while (i != funcs.end())
+    {
+        stream->apply_to(*i)->set_flows_to(out);
+        i++;
+    }
+
+    applies_from.push_back(stream);
 }
 
 void Stream::set_flows_to(Stream *stream)
 {
-    std::vector<Closure*>::iterator i = funcs.begin();
+    std::vector<Object*>::iterator i = funcs.begin();
     while (i != funcs.end())
     {
         stream->flow_from(*i);
@@ -78,4 +94,9 @@ void Stream::set_flows_to(Stream *stream)
     }
 
     flows_to.push_back(stream);
+}
+
+void Stream::set_flows_from(Stream *stream)
+{
+    // Nothing to do here
 }

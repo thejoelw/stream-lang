@@ -3,22 +3,29 @@
 
 #include <vector>
 
+#include "object.h"
 #include "context.h"
 
 class AstExpr;
 
-class Closure
+class Closure : public Object
 {
 public:
-    Closure(std::vector<AstExpr*> &exprs, Context *context)
+    Closure()
+        : num_decls(0)
+    {}
+
+    Closure(std::vector<AstExpr*> exprs, unsigned int num_decls, Context *context)
         : exprs(exprs)
+        , num_decls(num_decls)
         , context(*context)
     {}
 
-    Stream *execute(Closure *in);
+    Stream *execute(Object *in);
 
 protected:
-    std::vector<AstExpr*> &exprs;
+    unsigned int num_decls;
+    std::vector<AstExpr*> exprs;
     Context context;
 };
 

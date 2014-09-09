@@ -20,6 +20,7 @@ Stream *AstFlow::execute(Context *context)
     Stream *target_stream = target->execute(context);
 
     source_stream->set_flows_to(target_stream);
+    target_stream->set_flows_from(source_stream);
 
     return source_stream;
 }

@@ -3,7 +3,7 @@
 #include "astexpr.h"
 #include "stream.h"
 
-Stream *Closure::execute(Closure *in)
+Stream *Closure::execute(Object *in)
 {
     Context *new_context = new Context(context);
 

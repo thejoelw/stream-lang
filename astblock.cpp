@@ -137,7 +137,7 @@ unsigned int AstBlock::hoist_ident(std::string symbol, bool declare)
 
 Stream *AstBlock::execute(Context *context)
 {
-    Closure *closure = new Closure(exprs, context);
+    Closure *closure = new Closure(exprs, declared_symbols.size(), context);
 
     Stream *res = new Stream();
     res->flow_from(closure);

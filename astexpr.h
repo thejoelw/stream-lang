@@ -22,8 +22,10 @@ public:
     AstExpr()
     {}
 
+    /*
     virtual ~AstExpr()
     {}
+    */
 
     void init();
 
