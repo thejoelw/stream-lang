@@ -2,6 +2,7 @@
 #define STREAM_H
 
 #include <vector>
+#include <string>
 
 class Object;
 
@@ -21,6 +22,8 @@ public:
     void set_flows_from(Stream *stream); // this <= func
 
     std::vector<Object*> &get_vector() {return funcs;}
+
+    std::string to_string();
 
 protected:
     std::vector<Object*> funcs;

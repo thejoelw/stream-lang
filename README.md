@@ -1,7 +1,7 @@
 Stream
 ======
 
-Stream is the new thing. It's got a lot of cool features, of which most have been used in various languages before, but put them together and you get a programming language that's pretty radical.
+Stream has a lot of cool features, of which most have been used in various languages before, but put them together and you get a programming language that's pretty radical. Here are some of its design goals:
 
 * [Declarative] - you tell the compiler what to do, and the compiler figures out how to do it
 * [Reactive] - your program consists of a set of rules that specify how data should propogate when new input is received
@@ -31,9 +31,8 @@ Built-in syntax
 
 * `target = source`, `target <= source`, `source => target` - Streams from the source to the target. Any functions that the source stream contains, both now and in the future, are forwarded into the target stream. If `target` is not supplied, the current function's output stream is assumed. If `source` is not supplied, the current function's input stream is assumed.
 * `target source`, `target <- source`, `source -> target` - Pipes from the source to the target. Each function in target will be executed for each function in source. For example: `(2 +, 5 +, 7 +) <- (10, 20)` evaluates to `(12, 15, 17, 22, 25, 27)`. If `target` is not supplied, the current function's output stream is assumed. If `source` is not supplied, the current function's input stream is assumed.
-* `source | target`, `target <| source`, `source |> target` - Wraps source in a function before piping it to target. `source | target` is exactly the same as `[source] -> target`.
-* `{...}` - Returns a function, and defines `in` and `out` as the input and output streams. Also creates a scope, so that any streams created with `+` will not be accessible outside. Streams will not be returned implicitly, so `{1, 2} <- .` will return an empty stream.
-* `[...]` - Returns a function, but does not define `in` or `out`. Also does not create a new scope, so created streams will be accessible outside. Streams will be returned implicitly, so `[1, 2] <- .` will return a stream of `1` and `2`.
+* `{...}` - Returns a function, and defines `in`, `out`, and `self` as the input stream, output stream, and current function respectively. Also creates a scope, so that any streams created with `+` will not be accessible outside. Streams will not be returned implicitly, so `{1, 2} <- .` will return an empty stream.
+* `[...]` - Returns a function, but does not define `in`, `out`, or `self`. Also does not create a new scope, so created streams will be accessible outside. Streams will be returned implicitly, so `[1, 2] <- .` will return a stream of `1` and `2`.
 * `(...)` - Like `[...]`, but evaluates immediately. Streams will be returned implicitly, so `(1, 2)` will return a stream of `1` and `2`.
 * `.prop: value` - The `:` returns an inline function that returns `value` if `.prop` is supplied as input. Inline means that it adds its code to the containing function instead of creating a new function. For example, `[.answer: 42].answer` will return `42`.
 * `'abc'`, `"def"`, `.ghi` - Returns a function with string-like properties.

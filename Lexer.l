@@ -55,9 +55,6 @@ IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
 "="         { printf("return FLOW;\n"); return FLOW; }
 "<="        { printf("return LFLOW;\n"); return LFLOW; }
 "=>"        { printf("return RFLOW;\n"); return RFLOW; }
-"|"         { printf("return PIPE;\n"); return PIPE; }
-"<|"        { printf("return LPIPE;\n"); return LPIPE; }
-"|>"        { printf("return RPIPE;\n"); return RPIPE; }
 
 "("         { printf("return LPAREN;\n"); return LPAREN; }
 ")"         { printf("return RPAREN;\n"); return RPAREN; }
