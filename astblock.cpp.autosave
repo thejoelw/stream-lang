@@ -28,7 +28,7 @@ AstBlock::BindFlag operator^=(AstFunction::BindFlag &a, AstFunction::BindFlag b)
 { return a = static_cast<AstFunction::BindFlag>(static_cast<int>(a) ^ static_cast<int>(b)); }
 */
 
-void AstBlock::set_bind(const BindFlags flags)
+void AstBlock::set_bind(const Flags flags)
 {
     bind |= flags;
 }

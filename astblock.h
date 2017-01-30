@@ -10,26 +10,9 @@
 class AstBlock : public AstExpr
 {
 public:
-    typedef unsigned int BindFlags;
+    typedef unsigned int Flags;
 
-    static constexpr BindFlags BindNone        = 0;
-
-    // Binds the literal in/out keywords to the function's input/output streams:
-    // {in => out}
-    static constexpr BindFlags BindInOut       = 1 << 0;
-
-    // Binds implicit relation calls to the function's input/output streams:
-    // {-> my_stream}
-    // {my_stream =>}
-    static constexpr BindFlags BindImplicitRel = 1 << 1;
-
-    // Binds automatic streaming to the function's output stream:
-    // [123]
-    static constexpr BindFlags BindAutoOut     = 1 << 2;
-
-    // Binds identifier declarations to a new stream in the current function's scope:
-    // {+my_stream}
-    static constexpr BindFlags BindIdentDecl   = 1 << 3;
+    static constexpr Flags implicit_out = 1;
 
     /*
     friend AstFunction::BindFlag operator|(AstFunction::BindFlag a, AstFunction::BindFlag b);
@@ -49,7 +32,7 @@ public:
         exprs.push_back(expr);
     }
 
-    void set_bind(const BindFlags flags);
+    void set_bind(const Flags flags);
 
     void apply_bind(AstBlock *scope);
     void set_stack_start(unsigned int stack_size);
@@ -92,7 +75,7 @@ public:
     }
 
 protected:
-    BindFlags bind = BindNone;
+    Flags bind = BindNone;
 
     AstBlock *parent_scope;
     bool bind_ident_decl;

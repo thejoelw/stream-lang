@@ -31,8 +31,7 @@
 
 IDNT_START  [a-zA-Z_]
 IDNT_CONT   [a-zA-Z_0-9]
-IDNT_SYMBOL [~!@%&*+\-|;<>?/]
-IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
+IDNT        {IDNT_START}{IDNT_CONT}+
 
 %x comment
 %x str_single_quote
@@ -50,11 +49,15 @@ IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
     "*"+"/"     BEGIN(INITIAL);
 }
 
-"<-"        { printf("return LAPPLY;\n"); return LAPPLY; }
-"->"        { printf("return RAPPLY;\n"); return RAPPLY; }
-"="         { printf("return FLOW;\n"); return FLOW; }
-"<="        { printf("return LFLOW;\n"); return LFLOW; }
-"=>"        { printf("return RFLOW;\n"); return RFLOW; }
+"<-"        { printf("return LMAP;\n"); return LMAP; }
+"->"        { printf("return RMAP;\n"); return RMAP; }
+"<<"        { printf("return LREDUCE;\n"); return LREDUCE; }
+">>"        { printf("return RREDUCE;\n"); return RREDUCE; }
+"<"         { printf("return LAPPLY;\n"); return LAPPLY; }
+">"         { printf("return RAPPLY;\n"); return RAPPLY; }
+"<="        { printf("return LASSIGN;\n"); return LASSIGN; }
+"=>"        { printf("return RASSIGN;\n"); return RASSIGN; }
+"="         { printf("return ASSIGN;\n"); return ASSIGN; }
 
 "("         { printf("return LPAREN;\n"); return LPAREN; }
 ")"         { printf("return RPAREN;\n"); return RPAREN; }
@@ -63,16 +66,16 @@ IDNT        {IDNT_START}{IDNT_CONT}+|{IDNT_SYMBOL}+
 "{"         { printf("return LBRACE;\n"); return LBRACE; }
 "}"         { printf("return RBRACE;\n"); return RBRACE; }
 
-"#"         { printf("return STREAM_LEN;\n"); return STREAM_LEN; }
-"^"         { printf("return STREAM_FIRST;\n"); return STREAM_FIRST; }
-"$"         { printf("return STREAM_LAST;\n"); return STREAM_LAST; }
+"#"         { printf("return DIRECTIVE;\n"); return DIRECTIVE; }
 
 "=="        { printf("return SAME;\n"); return SAME; }
 
 [\r\n,]     { printf("return BREAK;\n"); return BREAK; }
 [ \t]*      { printf("Skipping blanks: '%s'\n", yytext); }
 [0-9]+      { printf("return NUMBER; // %s\n", yytext); SAVE_TOKEN; return NUMBER; }
-"+"{IDNT}   { printf("return DECL_IDENT; // %s\n", yytext); SAVE_TOKEN; return DECL_IDENT; }
+"-"{IDNT}   { printf("return PRIVATE_IDENT; // %s\n", yytext); SAVE_TOKEN; return PRIVATE_IDENT; }
+"+"{IDNT}   { printf("return PUBLIC_IDENT; // %s\n", yytext); SAVE_TOKEN; return PUBLIC_IDENT; }
+"."{IDNT}   { printf("return UNBOUND_IDENT; // %s\n", yytext); SAVE_TOKEN; return UNBOUND_IDENT; }
 {IDNT}      { printf("return IDENTIFIER; // %s\n", yytext); SAVE_TOKEN; return IDENTIFIER; }
 
 \'          { string_buf = new std::string(); BEGIN(str_single_quote); }

@@ -100,3 +100,19 @@ void Stream::set_flows_from(Stream *stream)
 {
     // Nothing to do here
 }
+
+std::string Stream::to_string()
+{
+    std::string str;
+
+    std::vector<Object*>::const_iterator i = funcs.cbegin();
+    while (i != funcs.cend())
+    {
+        str += ", ";
+        str += (*i)->to_string();
+
+        i++;
+    }
+
+    return "(" + str.substr(2) + ")";
+}

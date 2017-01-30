@@ -27,3 +27,8 @@ Stream *Closure::execute(Object *in)
 
     return res;
 }
+
+std::string Closure::to_string()
+{
+    return "[ Closure ]";
+}

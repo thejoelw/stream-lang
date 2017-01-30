@@ -23,6 +23,8 @@ public:
 
     Stream *execute(Object *in);
 
+    std::string to_string();
+
 protected:
     unsigned int num_decls;
     std::vector<AstExpr*> exprs;

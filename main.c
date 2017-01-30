@@ -48,12 +48,18 @@ int main(void)
     AstBlock *tree = getAST(test);
     tree->init();
 
+    std::cout << std::endl << std::endl;
+
+    std::cout << test << std::endl;
+
     std::cout << tree->to_string() << std::endl;
 
     AstBlock *input = new AstBlock();
     input->init();
 
     Stream *output = tree->execute(new Context());
+
+    std::cout << output->to_string() << std::endl;
 
     return 0;
 }

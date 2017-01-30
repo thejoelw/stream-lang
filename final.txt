@@ -1,0 +1,191 @@
+-count = >> {
+    +res
+    <= self {.res = res + 1}
+} {.res = 0}
+
+
+-stream >> -counter = {
+
+}
+
+-stream
+
+
+-> {} // Map operator. Distributive. (1, 2) -> func === (1 -> func), (2 -> func)
+>> {} // Reduce operator. Not distributive.
+> {} // Simple forwarding operator. Output goes to input. Not distributive.
+
+// A distributive function can be called with -> or >
+// A non-distributive function can only be called with >
+// When assigning a non-distributive function, it must be prefixed with |
+
+// When calling a function, each statement is sent a Shy as input. If Shy is accessed, an error occurs.
+// Assignments statements do not return anything, unless explicit.
+widget.log_event[.load, .url = req.fullUrl]
+
+// 2 separate events involved in function execution:
+// function running
+// function streaming to "in"
+
+-pack = >> {
+    +res, -in
+    <= self {.res = (res, in)}
+} -> {-in, =[in.res]}
+
+-func = >> pack -> {-in}
+-inc_by_count = >> [-in + (in >> Stream.count)] packed
+
+stream >> func
+
+stream -> {in + 1}
+
+-not = {
+    -in
+    <= in ?= True -> False
+    <= in ?= False -> True
+}
+
+(1, 2, 3) >> [True] // Returns True
+(1, 2, 3) -> [True] // Returns (True, True, True)
+
+
+
+
+
+
+-uncaught:Error:Stream.unique
+-caught:Error:Stream.unique
+
+caught:["Caught unthrown exception: %in", +in] Stream.subset_of[/uncaught]
+uncaught:["Uncaught exception: %in", +in] Stream.subset_of[/caught]
+
++throw = {
+    uncaught <= +in:Error
+}
++catch = {
+    caught <= +in:Error
+}
+
++pg = {
+
+}
+
++throwing_function = {
+    -> .err = Error 'My Error'
+    if something {
+        throw Error 'My error'
+    } else {
+        123
+    }
+}
+
+// It is an error if a named stream can never get data
+
+
++sum = />> {
+    +acc, +in
+    = self {.acc = acc + in}
+} {.acc = 0} -> /.acc
+
++sum = />> {
+    .acc = +acc + +in
+} < {.acc = 0} > [+acc]
+(1, 2, 3) > sum
+// > [+acc] sum [3] sum [2] sum [1] {.acc = 0}
+
+// As above:
+(1, 2) -> func === > func ([1], [2]) // Calls func twice
+(1, 2) > func === > func [1, 2] // Calls func once
+
+Every function's side effects must be distributive over its input.
+Thus, ()>func must have NO side effects.
+Basically, anything after a ">" must be pure.
+
+.prop searches for a declaration first left, then right
+[+prop] [.prop = 123] [+prop] // Will set the left +prop
+
+... // This is a special value. If accessed, throws an error
+
+// Property access:
++obj = {+prop = 123}
+obj.prop
+> [.prop]obj
+> obj > [.prop]
+> obj -> [.prop]
+
+// When assigned to a variable, a function decays to its output
+
++sum = />> {
+    +num = +in
+    <= self [+in + num]
+} < 0
+
+func // Does not run func
+abc -> func // Runs func for each element of abc
+abc > func // Runs func once, same as ()>func[abc]
+func < abc // Runs func once, same as ()>func[abc]
+func[abc] // Does not run func
+> func[abc] // Runs func once
+-> func[abc] // Runs func for each element of the input
+/abc -> func \n bla // Lazy, same as [abc] -> func \n bla
+/-> abc -> func \n bla // A little less lazy, same as [-> abc -> func] \n bla
+\abc -> func \n bla // Greedy, same as [abc -> func \n bla]
+
++filter = {
+    +func = +in
+    <= [+in -> func -> [in]]
+}
+
+
+throwing_function -> pg\ -> {
+
+}
+
+-> func // Returns a mapping function
+>> func // Returns a reducing function
+
+
+sum[1, 2]
+
++dsl = ".a + 1 / (4 + .b)"
+dsl >> {
+    +in, +out, +self
+    +tokens
+    in -> Variable -> [in.value | Number] => tokens
+    in -> Char -> (
+        {.first = '0', .last = '9'}
+
+    ) -> {
+        // Sub-processor for numbers
+        out <= {
+            in -> Char -> Range{.first = '0', .last = '9'}
+        }
+    }
+}
+
+1 ?> 2
+1 .+ 2
+
+
+
+
+
+
+
++fs = #require fs
+
++fs.open = {
+    +name = +in
+
+    +chars = ...
+    +lines = (
+        {+columns = ...}
+        {+columns = ...}
+        {+columns = ...}
+        ...
+    )
+}
+
+-> fs.open['file.txt'] -> /.lines -> {
+    .columns
+}

@@ -12,6 +12,8 @@ public:
 
     Stream *execute(Object *in);
 
+    std::string to_string();
+
     static const Object *ArgPlus;
     static const Object *ArgMinus;
     static const Object *ArgMul;

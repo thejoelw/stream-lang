@@ -6,9 +6,11 @@
 class AstIdent : public AstExpr
 {
 public:
-    AstIdent(std::string symbol, bool declare = false)
+    enum class Type {DeclPrivate, DeclPublic, Unbound, Reference};
+
+    AstIdent(std::string symbol, Type type)
         : symbol(symbol)
-        , declare(declare)
+        , type(type)
     {}
 
     void apply_bind(AstBlock *scope);
@@ -18,8 +20,12 @@ public:
 
     std::string to_string(unsigned int indent = 0)
     {
-        if (declare) {return "+" + symbol;}
-        else {return symbol;}
+        switch (type) {
+            case Type::DeclPrivate: return "-" + symbol;
+            case Type::DeclPublic: return "+" + symbol;
+            case Type::Unbound: return "." + symbol;
+            case Type::Reference: return symbol;
+        }
     }
 
     static const std::string ImplicitIn;
@@ -28,7 +34,7 @@ public:
 
 protected:
     std::string symbol;
-    bool declare;
+    Type type;
 
     unsigned int stack_id = 0;
 };

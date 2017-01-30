@@ -1,0 +1,119 @@
+-fs = require<('fs')
+-proc = require<('proc')
+
+-entries = fs.Entry<('./')
+entries <= entries -> fs.isDirectory -> [+in.children]
+
+-sources = entries -> fs.isFile -> filter<[+in.path.endsWith<('.c', '.cpp')]
+
+-succ
+-fail
+
+-run = -> proc.spawn {
+    process.stdout <= .cmd .. ' ' .. .args
+    process.stdout <= .stdout
+    process.stderr <= .stderr
+    +out = self
+}
+
+sources -> {
+    -out_file = (+in -> Crypto.md5_hex) .. '.a'
+    -child = nil -> run{.cmd = 'g++', .args = ('-g', '-O0', in, '-o', out_file)}
+    child.exit ?= 0 -> [out_file] => succ
+    child.exit ?! 0 -> [child.stdout .. child.stderr] => fail
+}
+
+not fail -> run{.cmd = 'g++', .args = (succ, '-o', 'target')}
+
+
+appending == extending
+
+1 -> {+out = 2} {
+    .in // 1
+    +in // 2
+    .out // 2
+    +out // [empty]
+}
+
+// .prop looks for bindings in all functions that are composed
+// Any function with unbound variables cannot be executed
+
+{... code ...} // function, can be appended. In absence of +out, +in is assigned to +out.
+[... code ...] // function. In absence of +out, each expression output is assigned to +out.
+(... code ...) // function, evaluated immediately. +in and +out are hoisted to enclosing function. Each expression output is assigned to +out.
+
+func1 func2
+// Returns func1 composed with func2. Also, input => func1.in ... func1.out => func2.in ... func2.out => output
+
+
+// functions are identity unless +out is re-defined
+{+prop}{.prop = 123}
+
+// division operator has arguments for precision
+
+
+-private_prop, +public_prop
+
+func1 func2 // Function concatenation is public inheritance. If you want private inheritance: {func1[](), ... func2 ...}. In addition, new public properties in func2 hide equivalently-named properties from func1. Including in/out.
+
+
+
+=val // Return val, without introducing out into the scope.
+
+// Implicit function definition
+-sum = >> {
+    +in, +acc
+    <= self {.acc = acc + in}
+} {.acc = 0} -> [.acc]
+
+sum<(1,2,3)
+
+// No implicit streaming from +in
+// Implicit streaming to +out is permitted
+=1
+2 =>
+<= 3
+
+=> // Assign
+-> // Call foreach
+> // Call once
+>> // Reduce
+
+// Taken operators: +, -, <, >, .
+// + and - are allowed if there is whitespace afterwards.
+// Comparison operators: ?=, ?!, ?<, ?>, ?<=, ?>=
+
+-reduce = {
+    +init
+    +reducer = +func
+    +stream = +in
+
+    <= stream >> {
+        +in, +index, +acc
+        <= self {
+            .index = index + 1
+            .acc = reducer{.index = index, .prev = acc, .cur = in}
+        }
+    } {.index = 0, .acc = init} -> [.acc]
+}
+
+(1, 2, 3) > reduce{.init = 0, .func = [+prev + +cur * +index]}
+
+
+{.abc = 123}
+
+How to access properties of an object/function?
+What if those properties reference the input?
++Class = {
+    +static_var = 123
+    +new = {
+        +inst_var = 123
+        <= \
+
+    }
+}
++instance = Class {.static_var = 456} :new {.inst_var = 456} !
+instance:inst_var
+
+Need to lock Class:new:inst_var
+Need to make class definitions simpler

@@ -31,6 +31,8 @@ protected:
     std::vector<Stream*> applies_to;
     std::vector<Stream*> applies_from;
     std::vector<Stream*> flows_to;
+
+    enum {Copy, ReturnRef, FlowRef} refs;
 };
 
 #endif // STREAM_H

@@ -27,6 +27,11 @@ Stream *Number::execute(Object *in)
     return res;
 }
 
+std::string Number::to_string()
+{
+    return std::to_string(value);
+}
+
 const Object *Number::ArgPlus = new Closure();
 const Object *Number::ArgMinus = new Closure();
 const Object *Number::ArgMul = new Closure();
