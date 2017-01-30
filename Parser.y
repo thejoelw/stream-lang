@@ -7,6 +7,7 @@
 
 #include "Parser.h"
 #include "Lexer.h"
+#include "astexpr.h"
 #include "astblock.h"
 
 #include <iostream>
@@ -103,7 +104,7 @@ body
     ;
 
 block
-    : LBRACE body RBRACE { $$ = $2; $2->add_flags(0); }
+    : LBRACE body RBRACE { $$ = $2; }
     | LBRACKET body RBRACKET { $$ = $2; $2->add_flags(AstBlock::implicit_out); }
     ;
 

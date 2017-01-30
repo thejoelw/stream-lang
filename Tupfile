@@ -1,0 +1,4 @@
+include_rules
+
+: | $(ROOT)/<src_objects> |> !link %<src_objects> |> $(MAIN_TARGET)
+: | $(ROOT)/<test_objects> |> !link %<test_objects> |> $(TEST_TARGET)

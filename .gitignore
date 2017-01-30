@@ -1,4 +1,10 @@
-stream-lang.config*
-stream-lang.creator*
-stream-lang.files*
-stream-lang.includes*
+*.config
+*.creator
+*.creator.user*
+*.files
+*.includes
+
+.tup
+build-*/*
+!build-*/tup.config
+

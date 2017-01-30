@@ -40,7 +40,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 20 "Parser.y" /* yacc.c:1909  */
+#line 21 "Parser.y" /* yacc.c:1909  */
 
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -48,7 +48,7 @@ extern int yydebug;
 typedef void* yyscan_t;
 #endif
 
-#line 38 "Parser.y" /* yacc.c:1909  */
+#line 39 "Parser.y" /* yacc.c:1909  */
 
     #include <string>
     #include "astexpr.h"
@@ -98,7 +98,7 @@ typedef void* yyscan_t;
 
 union YYSTYPE
 {
-#line 50 "Parser.y" /* yacc.c:1909  */
+#line 51 "Parser.y" /* yacc.c:1909  */
 
     std::string *str;
     AstBlock *function;

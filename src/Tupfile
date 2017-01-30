@@ -1,0 +1,6 @@
+include_rules
+
+# Create config/*.h files from defines.cfg
+run awk '/^[^#]/ { print ": |> echo \"#define "$0"\" > %o |> config/"$1".h" }' $(DEFINES_CONFIG_FILE)
+
+: foreach *.cpp | config/*.h |> !cpp |> %B.o $(ROOT)/<src_objects>

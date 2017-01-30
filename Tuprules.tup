@@ -1,0 +1,30 @@
+ROOT = $(TUP_CWD)
+DEFINES_CONFIG_FILE = $(ROOT)/defines.cfg
+SRC_PATH = $(ROOT)/src/
+THIRD_PARTH_PATH = $(ROOT)/3rd_party/
+
+MAIN_TARGET = $(ROOT)/stream
+TEST_TARGET = $(ROOT)/test
+
+CFLAGS += -Wall -Wfatal-errors -Wno-missing-braces -Wno-unused
+CFLAGS += -Iinclude/ -I$(SRC_PATH) -I$(THIRD_PARTH_PATH)
+# CFLAGS += `llvm-config --cppflags --libs core`
+
+ifeq (@(BUILD_TYPE),debug)
+    CFLAGS += -O0 -g
+endif
+ifeq (@(BUILD_TYPE),release)
+    CFLAGS += -O3 -ffast-math -DNDEBUG
+endif
+
+ifeq (@(TUP_PLATFORM),macosx)
+    CFLAGS += -std=c++1y -stdlib=libc++
+else
+    CFLAGS += -std=c++14
+endif
+
+LDFLAGS += -lgmp
+# LDFLAGS += `llvm-config --ldflags --libs core`
+
+!cpp = | *.h |> clang++ -c %f -o %o $(CFLAGS) $(CFLAGS_%f) |>
+!link = |> clang++ $(LDFLAGS) $(LDFLAGS_%o) -o %o $(CFLAGS) $(CFLAGS_%o) |>
